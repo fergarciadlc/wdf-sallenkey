@@ -1,0 +1,44 @@
+# .clang-format  — minimal JUCE-friendly C++23 style
+BasedOnStyle:        LLVM         # sensible default and widely documented  [oai_citation_attribution:0‡Clang](https://clang.llvm.org/docs/ClangFormatStyleOptions.html)
+Language:            Cpp
+Standard:            Latest       # lets clang-format follow C++23/C++26 tokens
+
+# --- white-space & indent ---------------------------------------------------
+IndentWidth:         4
+TabWidth:            4
+UseTab:              Never
+ContinuationIndentWidth: 8        # extra visual separation for long params
+
+# --- braces & layout --------------------------------------------------------
+BreakBeforeBraces:   Allman       # JUCE’s “brace on its own line” look  [oai_citation_attribution:1‡Juce Forum](https://forum.juce.com/t/automatic-juce-like-code-formatting-with-clang-format/31624?utm_source=chatgpt.com)
+BraceWrapping:
+  AfterFunction:     true
+  AfterClass:        true
+  AfterEnum:         true
+  SplitEmptyFunction: true
+  SplitEmptyRecord:  true
+  SplitEmptyNamespace: true
+
+# --- line length & compactness ---------------------------------------------
+ColumnLimit:         120          # roomy for DSP formulas but still review-able
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
+
+# --- pointers, templates, namespaces ---------------------------------------
+DerivePointerAlignment: false
+PointerAlignment:     Left        # `float* ptr` → matches JUCE examples  [oai_citation_attribution:2‡Melatonin](https://melatonin.dev/manuals/pamplejuce/life-with-pamplejuce/clang-format/?utm_source=chatgpt.com)
+AlwaysBreakTemplateDeclarations: Yes
+NamespaceIndentation: All
+
+# --- include ordering -------------------------------------------------------
+SortIncludes:        true
+IncludeBlocks:       Regroup
+IncludeCategories:
+  - Regex:           '^<'
+    Priority:        1            # STL / system headers first
+  - Regex:           '^"'
+    Priority:        2            # project headers
+
+# --- comments & misc --------------------------------------------------------
+ReflowComments:      false        # keeps neatly-wrapped JUCE comments intact
+SpaceBeforeParens:   ControlStatements
