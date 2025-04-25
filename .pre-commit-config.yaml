@@ -1,0 +1,23 @@
+minimum_pre_commit_version: "3.6.0"
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks 
+    rev: v4.6.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.7
+    hooks:
+      - id: ruff
+        args: [--fix, --unsafe-fixes, --target-version=py312]
+        types: [python]
+
+  # --- Modern C++ formatting ----------------------------------------------
+  - repo: https://github.com/cpplint-tools/pre-commit-clang-format
+    rev: v18.1.0
+    hooks:
+      - id: clang-format
+        files: \.(c|cc|cpp|cxx|h|hpp|hh)$
+        args: [-style=file]   # obey your .clang-format
