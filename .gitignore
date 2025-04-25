@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Compiled C/C++ libraries
+*.a
+*.so
+*.dylib
+*.dll
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# JUCE
+**JuceLibraryCode/
+**/Builds/
+
+# Logs and reports
+*.log
+.coverage
+.coverage.*
+.cache
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+htmlcov/
+
+# Miscellaneous
+*.DS_Store
