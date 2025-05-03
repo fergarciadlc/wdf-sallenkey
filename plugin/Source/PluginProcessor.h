@@ -9,7 +9,6 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include <xsimd/xsimd.hpp>
 #include <chowdsp_wdf/chowdsp_wdf.h>
 //==============================================================================
 /**
