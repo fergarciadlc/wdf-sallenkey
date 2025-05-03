@@ -14,6 +14,7 @@ venv.bak/
 
 # Build artifacts
 build/
+build_*/
 dist/
 *.egg-info/
 *.egg
