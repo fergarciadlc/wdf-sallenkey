@@ -27,6 +27,16 @@ set(DEFAULT_CMAKE_ARGS
 #   -DCMAKE_SKIP_RPATH=ON
 )
 
+set(XSIMD_CMAKE_ARGS
+  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+  -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+  -DXSIMD_SKIP_INSTALL=OFF    # we want it to install
+  -DENABLE_XTL_COMPLEX=OFF    # unless you really need xtl
+  -DBUILD_TESTS=OFF
+  -DBUILD_BENCHMARK=OFF
+  -DBUILD_EXAMPLES=OFF
+)
+
 # ExternalProject_Add(
 #     JUCE
 #     GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
@@ -54,5 +64,13 @@ ExternalProject_Add(
       "<SOURCE_DIR>/include/chowdsp_wdf"
       "<INSTALL_DIR>/include/chowdsp_wdf"
 )
+ExternalProject_Add(
+  xsimd
+  GIT_REPOSITORY    https://github.com/xtensor-stack/xsimd.git
+  GIT_TAG           13.2.0
+  PREFIX            "${CMAKE_BINARY_DIR}/xsimd"
+  INSTALL_DIR       "${DEPS_INSTALL_DIR}"
+  CMAKE_ARGS        ${XSIMD_CMAKE_ARGS}
+)
 
-# add_dependencies(chowdsp_wdf JUCE)
+# add_dependencies(chowdsp_wdf xsimd)
