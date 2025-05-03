@@ -9,7 +9,9 @@
 #pragma once
 
 #include <JuceHeader.h>
-
+//#include <xsimd/xsmd.hpp> // this must be included _before_ the chowdsp_wdf header!
+#include <xsimd/xsimd.hpp>
+#include <chowdsp_wdf/chowdsp_wdf.h>
 //==============================================================================
 /**
 */
