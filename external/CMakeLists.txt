@@ -3,7 +3,7 @@ project(DependenciesSuperbuild NONE)
 
 include(ExternalProject)
 
-# 1) Global settings once for all externals
+# Global settings once for all externals
 set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
 set(CMAKE_CXX_STANDARD 11 CACHE STRING "" FORCE)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,7 +16,7 @@ if(APPLE)
   set(CMAKE_OSX_DEPLOYMENT_TARGET ${SDK_VERSION} CACHE STRING "" FORCE)
 endif()
 
-# 2) Shared install tree
+# Shared install tree
 set(DEPS_INSTALL_DIR ${CMAKE_BINARY_DIR}/install)
 
 # 3) Common CMake args for all ExternalProject_Add
@@ -27,14 +27,14 @@ set(DEFAULT_CMAKE_ARGS
 #   -DCMAKE_SKIP_RPATH=ON
 )
 
-# ExternalProject_Add(
-#     JUCE
-#     GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
-#     GIT_TAG        8.0.6
-#     PREFIX         "${CMAKE_BINARY_DIR}/JUCE"
-#     INSTALL_DIR    "${DEPS_INSTALL_DIR}"
-#     CMAKE_ARGS     ${DEFAULT_CMAKE_ARGS}
-# )
+ExternalProject_Add(
+    JUCE
+    GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+    GIT_TAG        8.0.6
+    PREFIX         "${CMAKE_BINARY_DIR}/JUCE"
+    INSTALL_DIR    "${DEPS_INSTALL_DIR}"
+    CMAKE_ARGS     ${DEFAULT_CMAKE_ARGS}
+)
 
 ExternalProject_Add(
   chowdsp_wdf
