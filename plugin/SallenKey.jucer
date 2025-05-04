@@ -50,7 +50,7 @@
         <MODULEPATH id="juce_gui_extra" path="../../../../JUCE/modules"/>
       </MODULEPATHS>
     </VS2022>
-    <XCODE_MAC targetFolder="Builds/MacOSX">
+    <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="-I/Users/fernando/dev/upf/wdf-sallenkey/build_external/install/include">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="SallenKey"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="SallenKey"/>
