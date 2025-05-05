@@ -1,4 +1,3 @@
-project(SallenKeyPlugin VERSION 0.1.0)
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 
 juce_add_plugin(
