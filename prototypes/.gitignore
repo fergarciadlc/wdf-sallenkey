@@ -1,0 +1,20 @@
+# Archivos y carpetas temporales de Python
+__pycache__/
+*.py[cod]
+
+# Archivos de Jupyter
+.ipynb_checkpoints/
+
+# Entornos virtuales y de Conda
+.env/
+.venv/
+env/
+venv/
+
+# Archivos generados por sistemas operativos
+.DS_Store
+Thumbs.db
+
+# Archivos de construcción de plugins (JUCE)
+plugins_playground/Builds/
+plugins_playground/JuceLibraryCode/
