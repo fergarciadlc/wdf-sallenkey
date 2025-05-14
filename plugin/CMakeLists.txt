@@ -8,11 +8,11 @@ juce_add_plugin(
     NEEDS_MIDI_INPUT          FALSE
     NEEDS_MIDI_OUTPUT         FALSE
     PLUGIN_MANUFACTURER_CODE  Mtge
-    PLUGIN_CODE               Eeng
+    PLUGIN_CODE               Ewdf
     COPY_PLUGIN_AFTER_BUILD   ${COPY_PLUGIN_AFTER_BUILD}
     PLUGIN_INSTALL_DIR        "${PLUGIN_INSTALL_DIR}"
     FORMATS                   ${PLUGIN_FORMATS}
-    PRODUCT_NAME              "SallenKey"
+    PRODUCT_NAME              "WD Filters"
 )
 
 target_sources(${PROJECT_NAME}
