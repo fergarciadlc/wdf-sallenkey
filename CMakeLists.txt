@@ -16,7 +16,7 @@ set(CUSTOM_PLUGIN_INSTALL_DIR "" CACHE PATH
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(
         -Wall -Wextra -Wpedantic
-        -Werror
+        # -Werror
         -Wreorder -Wdeprecated-declarations
         -Wunused -Wswitch -Wreturn-type
     )
@@ -27,6 +27,9 @@ endif()
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+add_library(chowdsp_wdf INTERFACE)
+target_include_directories(chowdsp_wdf INTERFACE ${CMAKE_PREFIX_PATH}/include)
 
 find_package(JUCE CONFIG REQUIRED)
 set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON)

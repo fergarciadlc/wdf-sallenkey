@@ -43,6 +43,7 @@ target_link_libraries(
         juce::juce_audio_utils
         juce::juce_dsp
         juce::juce_gui_basics
+        chowdsp_wdf
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
