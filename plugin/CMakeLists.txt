@@ -35,6 +35,13 @@ target_compile_definitions(
         JUCE_VST3_CAN_REPLACE_VST2=0
 )
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        -Wno-error=shadow-field-in-constructor
+        -Wno-error=implicit-float-conversion
+    )
+endif()
+
 target_link_libraries(
     ${PROJECT_NAME}
     PRIVATE

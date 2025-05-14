@@ -12,8 +12,9 @@ struct RCLowpass
     wdft::CapacitorT<double> c1{1.0e-6}; // 1 uF capacitor
 
     wdft::WDFSeriesT<double, decltype(r1), decltype(c1)> s1{r1, c1}; // series connection of r1 and c1
-    wdft::PolarityInverterT<float, decltype(s1)> i1{s1};             // invert polarity
-    wdft::IdealVoltageSourceT<double, decltype(s1)> vs{s1};          // input voltage source
+    // Use double precision to match WDF types and avoid implicit conversion warnings
+    wdft::PolarityInverterT<double, decltype(s1)> i1{s1};   // invert polarity
+    wdft::IdealVoltageSourceT<double, decltype(s1)> vs{s1}; // input voltage source
 
     // prepare the WDF model here...
     void prepare(double sampleRate) { c1.prepare(sampleRate); }

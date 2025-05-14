@@ -150,7 +150,7 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, j
         {
             double x = buffer.getSample(channel, i);
             double y = lpFilter.processSample(x);
-            buffer.setSample(channel, i, y);
+            buffer.setSample(channel, i, static_cast<float>(y));
         }
     }
 }
