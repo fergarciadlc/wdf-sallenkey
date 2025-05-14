@@ -16,7 +16,7 @@ set(CUSTOM_PLUGIN_INSTALL_DIR "" CACHE PATH
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(
         -Wall -Wextra -Wpedantic
-        # -Werror
+        -Werror
         -Wreorder -Wdeprecated-declarations
         -Wunused -Wswitch -Wreturn-type
     )
