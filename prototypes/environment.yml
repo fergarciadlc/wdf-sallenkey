@@ -1,0 +1,13 @@
+name: wdf-prototypes
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy>=2.1.0
+  - scipy>=1.2.0
+  - matplotlib>=3.0.0
+  - pip
+  - ipykernel
+  - pip:
+      - git+https://github.com/gusanthon/pywdf

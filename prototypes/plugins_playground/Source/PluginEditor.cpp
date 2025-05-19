@@ -29,8 +29,8 @@ void SallenKeyAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
     g.setColour (juce::Colours::white);
-    g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+    g.setFont (35.0f);
+    g.drawFittedText ("SallenKey Plugin :)", getLocalBounds(), juce::Justification::centred, 1);
 }
 
 void SallenKeyAudioProcessorEditor::resized()
