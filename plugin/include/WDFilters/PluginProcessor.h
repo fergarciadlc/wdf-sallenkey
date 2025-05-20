@@ -47,8 +47,11 @@ public:
     void setStateInformation(const void* data, int sizeInBytes) override;
 
 private:
-    // WDFRCLowPass filter;
-    WDFRC2Cascade filter;
+    juce::AudioProcessorValueTreeState                  apvts;
+    juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+
+    WDFRCLowPass  lpf1;
+    WDFRC2Cascade lpf2;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
 };
