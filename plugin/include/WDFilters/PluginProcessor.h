@@ -3,6 +3,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <chowdsp_wdf/chowdsp_wdf.h>
 
+#include "HighPassFilter.h"
 #include "LowPassFilter.h"
 
 //==============================================================================
@@ -50,8 +51,8 @@ private:
     juce::AudioProcessorValueTreeState                  apvts;
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
-    WDFRCLowPass  lpf1;
-    WDFRC2Cascade lpf2;
+    WDFRCLowPass         lpf1;
+    WDFRC2LowPassCascade lpf2;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
 };
