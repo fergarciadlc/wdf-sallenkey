@@ -3,19 +3,19 @@
 #include "WDFilters/WDFilter.h"
 
 /**
- * @brief First-order RC Low Pass Filter using WDF
+ * @brief First-order RC High Pass Filter using WDF
  *
- * Implementation of a first-order low pass filter using a series resistor
- * followed by a shunt capacitor.
+ * Implementation of a first-order high pass filter using a series capacitor
+ * followed by a shunt resistor.
  */
-// First-order WDF low-pass for JUCE
-class WDFRCLowPass : public WDFilter
+class WDFRCHighPass : public WDFilter
 {
 public:
-    WDFRCLowPass()
-        : r1(1.0e3),  // will be overridden in setCutoff()
-          c1(1.0e-6), // 1 uF -> keeps math easy
-          s1(r1, c1), inverter(s1), vin(s1)
+    WDFRCHighPass()
+        : c1(1.0e-6), // 1 uF (fixed)
+          r1(1.0e3),  // tuned by setCutoff()
+          s1(c1, r1), // series C -> R
+          inverter(s1), vin(s1)
     {}
 
     // WDFilter API
@@ -33,7 +33,7 @@ public:
         vin.incident(inverter.reflected());
         inverter.incident(vin.reflected());
 
-        return wdft::voltage<double>(c1); // output at the cap
+        return wdft::voltage<double>(r1); // output at the resistor
     }
 
     void setCutoff(double newFc) override
@@ -44,7 +44,7 @@ public:
 
     double getCutoff() const override { return cutoff; }
 
-    Type getType() const override { return Type::LowPass; }
+    Type getType() const override { return Type::HighPass; }
 
     Order getOrder() const override { return Order::First; }
 
@@ -58,9 +58,9 @@ private:
     }
 
     // WDF elements
-    wdft::ResistorT<double>                              r1;
     wdft::CapacitorT<double>                             c1;
-    wdft::WDFSeriesT<double, decltype(r1), decltype(c1)> s1;
+    wdft::ResistorT<double>                              r1;
+    wdft::WDFSeriesT<double, decltype(c1), decltype(r1)> s1;
     wdft::PolarityInverterT<double, decltype(s1)>        inverter;
     wdft::IdealVoltageSourceT<double, decltype(s1)>      vin;
 
@@ -69,7 +69,13 @@ private:
     double cutoff{1000.0};
 };
 
-class WDFRC2LowPassCascade : public WDFilter
+/**
+ * @brief Second-order RC High-Pass: two cascaded first-order stages
+ *
+ * Implementation of a second-order high pass filter by cascading
+ * two first-order high pass filter stages.
+ */
+class WDFRC2HighPassCascade : public WDFilter
 {
 public:
     void prepare(double Fs) override
@@ -93,11 +99,11 @@ public:
 
     double getCutoff() const override { return cutoff; }
 
-    Type getType() const override { return Type::LowPass; }
+    Type getType() const override { return Type::HighPass; }
 
     Order getOrder() const override { return Order::Second; }
 
 private:
-    WDFRCLowPass stage1, stage2;
-    double       fs{44100.0}, cutoff{1000.0};
+    WDFRCHighPass stage1, stage2;
+    double        fs{44100.0}, cutoff{1000.0};
 };
