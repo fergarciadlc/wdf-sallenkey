@@ -1,12 +1,12 @@
-#include "SallenKey/WDFilter.h"
+#include "WDFilters/WDFilter.h"
 
-#include "SallenKey/BandPassFilter.h"
-#include "SallenKey/HighPassFilter.h"
-#include "SallenKey/HighPassFilter2.h"
-#include "SallenKey/HighPassFilter3.h"
-#include "SallenKey/LowPassFilter.h"
-#include "SallenKey/LowPassFilter2.h"
-#include "SallenKey/LowPassFilter3.h"
+#include "WDFilters/BandPassFilter.h"
+#include "WDFilters/HighPassFilter.h"
+#include "WDFilters/HighPassFilter2.h"
+#include "WDFilters/HighPassFilter3.h"
+#include "WDFilters/LowPassFilter.h"
+#include "WDFilters/LowPassFilter2.h"
+#include "WDFilters/LowPassFilter3.h"
 
 std::unique_ptr<WDFilter> WDFilter::create(Type type, Order order)
 {
