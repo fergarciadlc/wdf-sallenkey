@@ -1,19 +1,19 @@
 #pragma once
 
-#include <chowdsp_wdf/chowdsp_wdf.h>
 #include <juce_core/juce_core.h>
+#include <chowdsp_wdf/chowdsp_wdf.h>
 
 namespace wdft = chowdsp::wdft;
 
 /**
  * @brief Base abstract class for all WDF filters
- * 
+ *
  * This serves as a common interface for all filter implementations,
  * regardless of type (LP, HP, BP) or order (1st, 2nd, 3rd).
  */
 class WDFilter
 {
-  public:
+public:
     enum class Type
     {
         LowPass,
@@ -27,7 +27,7 @@ class WDFilter
         Second
     };
 
-    WDFilter() = default;
+    WDFilter()          = default;
     virtual ~WDFilter() = default;
 
     /**

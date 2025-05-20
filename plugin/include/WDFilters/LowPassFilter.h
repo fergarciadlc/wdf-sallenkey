@@ -4,20 +4,19 @@
 
 /**
  * @brief First-order RC Low Pass Filter using WDF
- * 
+ *
  * Implementation of a first-order low pass filter using a series resistor
  * followed by a shunt capacitor.
  */
 // First-order WDF low-pass for JUCE
 class WDFRCLowPass : public WDFilter
 {
-  public:
+public:
     WDFRCLowPass()
         : r1(1.0e3),  // will be overridden in setCutoff()
           c1(1.0e-6), // 1 uF - keeps math easy
           s1(r1, c1), inverter(s1), vin(s1)
-    {
-    }
+    {}
 
     // WDFilter API
     void prepare(double newSampleRate) override
@@ -44,23 +43,26 @@ class WDFRCLowPass : public WDFilter
     }
 
     double getCutoff() const override { return cutoff; }
+
     Type getType() const override { return Type::LowPass; }
+
     Order getOrder() const override { return Order::First; }
 
-  private:
+private:
     void updateComponentValues()
     {
-        constexpr double C = 1.0e-6;                                                 // farads
-        const double R = 1.0 / (2.0 * juce::MathConstants<double>::pi * cutoff * C); // from fc formula
+        constexpr double C = 1.0e-6; // farads
+        const double     R =
+            1.0 / (2.0 * juce::MathConstants<double>::pi * cutoff * C); // from fc formula
         r1.setResistanceValue(R);
     }
 
     // WDF elements
-    wdft::ResistorT<double> r1;
-    wdft::CapacitorT<double> c1;
+    wdft::ResistorT<double>                              r1;
+    wdft::CapacitorT<double>                             c1;
     wdft::WDFSeriesT<double, decltype(r1), decltype(c1)> s1;
-    wdft::PolarityInverterT<double, decltype(s1)> inverter;
-    wdft::IdealVoltageSourceT<double, decltype(s1)> vin;
+    wdft::PolarityInverterT<double, decltype(s1)>        inverter;
+    wdft::IdealVoltageSourceT<double, decltype(s1)>      vin;
 
     // state
     double sampleRate{44100.0};
