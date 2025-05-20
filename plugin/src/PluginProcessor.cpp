@@ -11,10 +11,31 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
 #endif
                          .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
-      )
+                         ),
+      apvts(*this, nullptr, juce::Identifier("AudioPlugin"), createParameterLayout())
 {}
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor() {}
+
+juce::AudioProcessorValueTreeState::ParameterLayout
+AudioPluginAudioProcessor::createParameterLayout()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    // select the filter type
+    layout.add(std::make_unique<juce::AudioParameterChoice>(
+        juce::ParameterID{"filterType", 1},
+        "Filter Type",
+        juce::StringArray{"Low Pass 1st", "Low Pass 2nd"},
+        0));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"cutoff", 1},
+                                                           "Cutoff",
+                                                           20.0f,
+                                                           20000.0f,
+                                                           1000.0f));
+
+    return layout;
+}
 
 //==============================================================================
 const juce::String AudioPluginAudioProcessor::getName() const
@@ -87,7 +108,8 @@ void AudioPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerB
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
     juce::ignoreUnused(sampleRate, samplesPerBlock);
-    filter.prepare(sampleRate);
+    lpf1.prepare(sampleRate);
+    lpf2.prepare(sampleRate);
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -129,6 +151,12 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     auto                    totalNumInputChannels  = getTotalNumInputChannels();
     auto                    totalNumOutputChannels = getTotalNumOutputChannels();
 
+    float cutoff     = apvts.getRawParameterValue("cutoff")->load();
+    int   filterType = static_cast<int>(apvts.getRawParameterValue("filterType")->load());
+
+    lpf1.setCutoff(cutoff);
+    lpf2.setCutoff(cutoff);
+
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
@@ -149,8 +177,17 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         for (int i = 0; i < buffer.getNumSamples(); ++i)
         {
             double x = buffer.getSample(channel, i);
-            double y = filter.processSample(x);
-            buffer.setSample(channel, i, static_cast<float>(y));
+            if (filterType == 0)
+            {
+                // process the sample
+                double y = lpf1.processSample(x);
+                buffer.setSample(channel, i, static_cast<float>(y));
+            }
+            else if (filterType == 1)
+            {
+                double y = lpf2.processSample(x);
+                buffer.setSample(channel, i, static_cast<float>(y));
+            }
         }
     }
 }
@@ -163,7 +200,8 @@ bool AudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
-    return new AudioPluginAudioProcessorEditor(*this);
+    // return new AudioPluginAudioProcessorEditor(*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
