@@ -14,12 +14,12 @@ class WDFRCLowPass : public WDFilter
   public:
     WDFRCLowPass()
         : r1(1.0e3),  // will be overridden in setCutoff()
-          c1(1.0e-6), // 1 µF – keeps math easy
+          c1(1.0e-6), // 1 uF - keeps math easy
           s1(r1, c1), inverter(s1), vin(s1)
     {
     }
 
-    /* ---- WDFilter API ---- */
+    // WDFilter API
     void prepare(double newSampleRate) override
     {
         sampleRate = newSampleRate;
@@ -55,14 +55,14 @@ class WDFRCLowPass : public WDFilter
         r1.setResistanceValue(R);
     }
 
-    /*---- WDF elements ----*/
+    // WDF elements
     wdft::ResistorT<double> r1;
     wdft::CapacitorT<double> c1;
     wdft::WDFSeriesT<double, decltype(r1), decltype(c1)> s1;
     wdft::PolarityInverterT<double, decltype(s1)> inverter;
     wdft::IdealVoltageSourceT<double, decltype(s1)> vin;
 
-    /*---- state ----*/
+    // state
     double sampleRate{44100.0};
     double cutoff{1000.0};
 };
