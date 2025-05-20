@@ -88,7 +88,7 @@ void AudioPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerB
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
     juce::ignoreUnused(sampleRate, samplesPerBlock);
-    lpFilter.prepare(sampleRate);
+    filter.prepare(sampleRate);
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -149,7 +149,7 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, j
         for (int i = 0; i < buffer.getNumSamples(); ++i)
         {
             double x = buffer.getSample(channel, i);
-            double y = lpFilter.processSample(x);
+            double y = filter.processSample(x);
             buffer.setSample(channel, i, static_cast<float>(y));
         }
     }

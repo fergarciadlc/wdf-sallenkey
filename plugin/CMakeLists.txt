@@ -19,6 +19,7 @@ target_sources(${PROJECT_NAME}
     PRIVATE
         src/PluginEditor.cpp
         src/PluginProcessor.cpp
+        # src/WDFilter.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -39,6 +40,13 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     target_compile_options(${PROJECT_NAME} PRIVATE
         -Wno-error=shadow-field-in-constructor
         -Wno-error=implicit-float-conversion
+        -Wno-error=shadow
+        -Wno-error=float-equal
+        -Wno-error=switch-enum
+        -Wno-shadow-field-in-constructor
+        -Wno-float-equal
+        -Wno-switch-enum
+        -Wno-shadow
     )
 endif()
 
