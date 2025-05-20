@@ -68,3 +68,36 @@ private:
     double sampleRate{44100.0};
     double cutoff{1000.0};
 };
+
+class WDFRC2Cascade : public WDFilter
+{
+public:
+    void prepare(double Fs) override
+    {
+        fs = Fs;
+        stage1.prepare(fs);
+        stage2.prepare(fs);
+    }
+
+    double processSample(double x) override
+    {
+        return stage2.processSample(stage1.processSample(x));
+    }
+
+    void setCutoff(double fc) override
+    {
+        cutoff = juce::jlimit(20.0, fs * 0.45, fc);
+        stage1.setCutoff(cutoff);
+        stage2.setCutoff(cutoff);
+    }
+
+    double getCutoff() const override { return cutoff; }
+
+    Type getType() const override { return Type::LowPass; }
+
+    Order getOrder() const override { return Order::Second; }
+
+private:
+    WDFRCLowPass stage1, stage2;
+    double       fs{44100.0}, cutoff{1000.0};
+};
