@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SallenKey/WDFilter.h"
+#include "WDFilters/WDFilter.h"
 
 /**
  * @brief First-order RC Low Pass Filter using WDF

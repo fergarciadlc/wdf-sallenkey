@@ -1,6 +1,6 @@
-#include "SallenKey/PluginProcessor.h"
+#include "WDFilters/PluginProcessor.h"
 
-#include "SallenKey/PluginEditor.h"
+#include "WDFilters/PluginEditor.h"
 
 //==============================================================================
 AudioPluginAudioProcessor::AudioPluginAudioProcessor()
