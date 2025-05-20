@@ -1,44 +1,70 @@
-# .clang-format  — minimal JUCE-friendly C++23 style
-BasedOnStyle:        LLVM         # sensible default and widely documented  [oai_citation_attribution:0‡Clang](https://clang.llvm.org/docs/ClangFormatStyleOptions.html)
-Language:            Cpp
-Standard:            Latest       # lets clang-format follow C++23/C++26 tokens
+# clang-format for modern audio‑plugin projects (C++20)
+---
+Language:                Cpp
+Standard:                c++20
+BasedOnStyle:            LLVM
 
-# --- white-space & indent ---------------------------------------------------
-IndentWidth:         4
-TabWidth:            4
-UseTab:              Never
-ContinuationIndentWidth: 8        # extra visual separation for long params
-
-# --- braces & layout --------------------------------------------------------
-BreakBeforeBraces:   Allman       # JUCE’s “brace on its own line” look  [oai_citation_attribution:1‡Juce Forum](https://forum.juce.com/t/automatic-juce-like-code-formatting-with-clang-format/31624?utm_source=chatgpt.com)
-BraceWrapping:
-  AfterFunction:     true
-  AfterClass:        true
-  AfterEnum:         true
-  SplitEmptyFunction: true
-  SplitEmptyRecord:  true
-  SplitEmptyNamespace: true
-
-# --- line length & compactness ---------------------------------------------
-ColumnLimit:         120          # roomy for DSP formulas but still review-able
+# --- whitespace & layout ---
+IndentWidth:             4
+UseTab:                  Never
+ColumnLimit:             100        # tighter than JUCE’s 120
+NamespaceIndentation:    All
+ConstructorInitializerIndentWidth: 4
 AllowShortFunctionsOnASingleLine: Inline
-AllowShortIfStatementsOnASingleLine: false
+SeparateDefinitionBlocks: Always    # needs clang-format 17+
 
-# --- pointers, templates, namespaces ---------------------------------------
-DerivePointerAlignment: false
-PointerAlignment:     Left        # `float* ptr` → matches JUCE examples  [oai_citation_attribution:2‡Melatonin](https://melatonin.dev/manuals/pamplejuce/life-with-pamplejuce/clang-format/?utm_source=chatgpt.com)
-AlwaysBreakTemplateDeclarations: Yes
-NamespaceIndentation: All
+# --- brace wrapping ---
+BreakBeforeBraces:       Custom     # must be 'Custom' when BraceWrapping block present
+BraceWrapping:
+  AfterClass:            true
+  AfterControlStatement: true
+  AfterEnum:             true
+  AfterExternBlock:      false
+  AfterFunction:         true
+  AfterNamespace:        true
+  AfterObjCDeclaration:  false
+  AfterStruct:           true
+  AfterUnion:            true
+  BeforeCatch:           true
+  BeforeElse:            true
+  BeforeLambdaBody:      false
+  BeforeWhile:           false
+  IndentBraces:          false
+  SplitEmptyFunction:    false
+  SplitEmptyRecord:      false
+  SplitEmptyNamespace:   false
 
-# --- include ordering -------------------------------------------------------
-SortIncludes:        true
-IncludeBlocks:       Regroup
+# --- alignment ---
+AlignConsecutiveAssignments:  true
+AlignConsecutiveDeclarations: true
+BinPackParameters:            false
+BinPackArguments:             false
+DerivePointerAlignment:       false
+PointerAlignment:             Left
+IndentAccessModifiers:        false        # flush‑left access labels
+AccessModifierOffset:         -4           # pull specifiers back to column 0
+AlignAfterOpenBracket:        Align
+AllowAllArgumentsOnNextLine:  false
+PenaltyBreakBeforeFirstCallParameter: 19    # default value to avoid over‑eager breaks
+
+# --- includes ---
+SortIncludes:      true
+IncludeBlocks:     Preserve
 IncludeCategories:
-  - Regex:           '^<'
-    Priority:        1            # STL / system headers first
-  - Regex:           '^"'
-    Priority:        2            # project headers
+  - Regex:         '^(<.*\\.h>)'
+    Priority:      1
+  - Regex:         '^(<|")juce(_.*|/juce_.*)'
+    Priority:      2
+  - Regex:         '.*'
+    Priority:      3
 
-# --- comments & misc --------------------------------------------------------
-ReflowComments:      false        # keeps neatly-wrapped JUCE comments intact
-SpaceBeforeParens:   ControlStatements
+# --- comments ---
+ReflowComments:    true
+CommentPragmas:    '^//!|^/\\*\\*'
+
+# --- misc modern C++ ---
+Cpp11BracedListStyle:          true
+SpaceAfterCStyleCast:          true
+SpaceInEmptyParentheses:       false
+SpacesInAngles:                false
+SpacesInSquareBrackets:        false
