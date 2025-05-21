@@ -4,6 +4,13 @@
 #include "WDFilters/LowPassFilter.h"
 #include "WDFilters/WDFilter.h"
 
+/**
+ * @brief First-order RC Band Pass Filter using WDF
+ *
+ * Implementation of a first-order band pass filter by cascading a first-order high pass filter
+ * followed by a first-order low pass filter. The center frequency and bandwidth are controlled
+ * by setting the cutoff frequencies of the individual filters.
+ */
 class WDFRCBandPass1st : public WDFilter
 {
 public:
@@ -73,6 +80,14 @@ private:
     double bandwidthInOctaves{1.0}; // Default to 1 octave
 };
 
+/**
+ * @brief Second-order RC Band Pass Filter using WDF
+ *
+ * Implementation of a second-order band pass filter by cascading a second-order high pass filter
+ * followed by a second-order low pass filter. This provides steeper filter slopes (24 dB/octave)
+ * compared to the first-order version. The center frequency and bandwidth are controlled
+ * by setting the cutoff frequencies of the individual filters.
+ */
 class WDFRCBandPass2nd : public WDFilter
 {
 public:
