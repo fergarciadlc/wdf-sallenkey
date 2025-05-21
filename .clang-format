@@ -7,7 +7,7 @@ BasedOnStyle:            LLVM
 # --- whitespace & layout ---
 IndentWidth:             4
 UseTab:                  Never
-ColumnLimit:             100        # tighter than JUCE’s 120
+ColumnLimit:             120
 NamespaceIndentation:    All
 ConstructorInitializerIndentWidth: 4
 AllowShortFunctionsOnASingleLine: Inline
