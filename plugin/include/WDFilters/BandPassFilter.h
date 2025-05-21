@@ -15,7 +15,14 @@ public:
         updateCutoffs();
     }
 
-    double processSample(double x) override { return stage2.processSample(stage1.processSample(x)); }
+    double processSample(double x) override
+    {
+
+        if (applyAutoGain)
+            x *= 1.5; // Apply auto gain to maintain consistent output level
+
+        return stage2.processSample(stage1.processSample(x));
+    }
 
     void setCutoff(double fc) override
     {
@@ -36,6 +43,8 @@ public:
     Type getType() const override { return Type::BandPass; }
 
     Order getOrder() const override { return Order::Second; }
+
+    bool applyAutoGain{true};
 
 private:
     void updateCutoffs()
@@ -59,8 +68,9 @@ private:
 
     WDFRCHighPass stage1;
     WDFRCLowPass  stage2;
-    double        fs{44100.0}, cutoff{1000.0};
-    double        bandwidthInOctaves{1.0}; // Default to 1 octave
+
+    double fs{44100.0}, cutoff{1000.0};
+    double bandwidthInOctaves{1.0}; // Default to 1 octave
 };
 
 class WDFRCBandPass2nd : public WDFilter
@@ -74,7 +84,12 @@ public:
         updateCutoffs();
     }
 
-    double processSample(double x) override { return stage2.processSample(stage1.processSample(x)); }
+    double processSample(double x) override
+    {
+        if (applyAutoGain)
+            x *= 2.23; // Apply auto gain to maintain consistent output level
+        return stage2.processSample(stage1.processSample(x));
+    }
 
     void setCutoff(double fc) override
     {
@@ -95,6 +110,8 @@ public:
     Type getType() const override { return Type::BandPass; }
 
     Order getOrder() const override { return Order::Second; }
+
+    bool applyAutoGain{true};
 
 private:
     void updateCutoffs()
@@ -118,6 +135,7 @@ private:
 
     WDFRC2HighPassCascade stage1;
     WDFRC2LowPassCascade  stage2;
-    double                fs{44100.0}, cutoff{1000.0};
-    double                bandwidthInOctaves{1.0}; // Default to 1 octave
+
+    double fs{44100.0}, cutoff{1000.0};
+    double bandwidthInOctaves{1.0}; // Default to 1 octave
 };
