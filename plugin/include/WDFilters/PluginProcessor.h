@@ -51,8 +51,12 @@ private:
     juce::AudioProcessorValueTreeState                  apvts;
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
-    WDFRCLowPass         lpf1;
-    WDFRC2LowPassCascade lpf2;
+    // Pre-allocated filter pool
+    std::unique_ptr<WDFilter> lowPass1;
+    std::unique_ptr<WDFilter> lowPass2;
+    std::unique_ptr<WDFilter> highPass1;
+    std::unique_ptr<WDFilter> highPass2;
+    WDFilter*                 currentFilter = nullptr;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
 };
