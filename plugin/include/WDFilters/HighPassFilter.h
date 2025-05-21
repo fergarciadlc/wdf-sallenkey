@@ -51,9 +51,8 @@ public:
 private:
     void updateComponentValues()
     {
-        constexpr double C = 1.0e-6; // farads
-        const double     R =
-            1.0 / (2.0 * juce::MathConstants<double>::pi * cutoff * C); // from fc formula
+        constexpr double C = 1.0e-6;                                                     // farads
+        const double     R = 1.0 / (2.0 * juce::MathConstants<double>::pi * cutoff * C); // from fc formula
         r1.setResistanceValue(R);
     }
 
@@ -85,10 +84,7 @@ public:
         stage2.prepare(fs);
     }
 
-    double processSample(double x) override
-    {
-        return stage2.processSample(stage1.processSample(x));
-    }
+    double processSample(double x) override { return stage2.processSample(stage1.processSample(x)); }
 
     void setCutoff(double fc) override
     {

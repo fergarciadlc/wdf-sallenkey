@@ -17,17 +17,15 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor() {}
 
-juce::AudioProcessorValueTreeState::ParameterLayout
-AudioPluginAudioProcessor::createParameterLayout()
+juce::AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createParameterLayout()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
     // select the filter type
-    layout.add(
-        std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"filterType", 1},
-                                                     "Filter Type",
-                                                     juce::StringArray{"Low Pass", "High Pass"},
-                                                     0));
+    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"filterType", 1},
+                                                            "Filter Type",
+                                                            juce::StringArray{"Low Pass", "High Pass"},
+                                                            0));
     layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"filterOrder", 1},
                                                             "Filter Order",
                                                             juce::StringArray{"1st", "2nd"},
@@ -156,8 +154,7 @@ bool AudioPluginAudioProcessor::isBusesLayoutSupported(const BusesLayout& layout
 #endif
 }
 
-void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
-                                             juce::MidiBuffer&         midiMessages)
+void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ignoreUnused(midiMessages);
     juce::ScopedNoDenormals noDenormals;
