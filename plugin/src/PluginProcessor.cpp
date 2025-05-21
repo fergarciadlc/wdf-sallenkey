@@ -24,7 +24,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::c
     // select the filter type
     layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"filterType", 1},
                                                             "Filter Type",
-                                                            juce::StringArray{"Low Pass", "High Pass"},
+                                                            juce::StringArray{"Low Pass", "High Pass", "Band Pass"},
                                                             0));
     layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"filterOrder", 1},
                                                             "Filter Order",
@@ -35,6 +35,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::c
                                                            20.0f,
                                                            20000.0f,
                                                            1000.0f));
+    // layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"bandwidth", 1},
+    //                                                        "Bandwidth (octaves)",
+    //                                                        0.1f,
+    //                                                        3.0f,
+    //                                                        1.0f));
 
     return layout;
 }
@@ -113,12 +118,16 @@ void AudioPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerB
     lowPass2  = WDFilter::create(WDFilter::Type::LowPass, WDFilter::Order::Second);
     highPass1 = WDFilter::create(WDFilter::Type::HighPass, WDFilter::Order::First);
     highPass2 = WDFilter::create(WDFilter::Type::HighPass, WDFilter::Order::Second);
+    bandPass1 = WDFilter::create(WDFilter::Type::BandPass, WDFilter::Order::First);
+    bandPass2 = WDFilter::create(WDFilter::Type::BandPass, WDFilter::Order::Second);
 
     // Prepare all filters
     lowPass1->prepare(sampleRate);
     lowPass2->prepare(sampleRate);
     highPass1->prepare(sampleRate);
     highPass2->prepare(sampleRate);
+    bandPass1->prepare(sampleRate);
+    bandPass2->prepare(sampleRate);
 
     // Set initial filter (default to lowPass1)
     currentFilter = lowPass1.get();
@@ -163,9 +172,8 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, j
 
     float cutoff      = apvts.getRawParameterValue("cutoff")->load();
     int   filterType  = static_cast<int>(apvts.getRawParameterValue("filterType")->load());
-    int   filterOrder = static_cast<int>(apvts.getRawParameterValue("filterOrder")->load());
-
-    // Select the current filter based on filterType and filterOrder
+    int   filterOrder = static_cast<int>(apvts.getRawParameterValue("filterOrder")
+                                           ->load()); // Select the current filter based on filterType and filterOrder
     if (filterType == 0 && filterOrder == 0)
         currentFilter = lowPass1.get();
     else if (filterType == 0 && filterOrder == 1)
@@ -174,6 +182,10 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, j
         currentFilter = highPass1.get();
     else if (filterType == 1 && filterOrder == 1)
         currentFilter = highPass2.get();
+    else if (filterType == 2 && filterOrder == 0)
+        currentFilter = bandPass1.get();
+    else if (filterType == 2 && filterOrder == 1)
+        currentFilter = bandPass2.get();
     else
         currentFilter = nullptr;
 

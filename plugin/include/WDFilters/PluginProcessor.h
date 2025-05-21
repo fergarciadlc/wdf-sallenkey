@@ -3,6 +3,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <chowdsp_wdf/chowdsp_wdf.h>
 
+#include "BandPassFilter.h"
 #include "HighPassFilter.h"
 #include "LowPassFilter.h"
 
@@ -56,6 +57,8 @@ private:
     std::unique_ptr<WDFilter> lowPass2;
     std::unique_ptr<WDFilter> highPass1;
     std::unique_ptr<WDFilter> highPass2;
+    std::unique_ptr<WDFilter> bandPass1;
+    std::unique_ptr<WDFilter> bandPass2;
     WDFilter*                 currentFilter = nullptr;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
