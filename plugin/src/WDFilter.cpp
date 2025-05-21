@@ -1,5 +1,6 @@
 #include "WDFilters/WDFilter.h"
 
+#include "WDFilters/BandPassFilter.h"
 #include "WDFilters/HighPassFilter.h"
 #include "WDFilters/LowPassFilter.h"
 
@@ -29,10 +30,17 @@ std::unique_ptr<WDFilter> WDFilter::create(Type type, Order order)
             jassertfalse;
             return std::make_unique<WDFRCHighPass>();
         }
-
-        // case Type::BandPass:
-        //     // BandPass is inherently at least 2nd order
-        //     return std::make_unique<BandPassFilter>();
+    case Type::BandPass:
+        switch (order)
+        {
+        case Order::First:
+            return std::make_unique<WDFRCBandPass1st>();
+        case Order::Second:
+            return std::make_unique<WDFRCBandPass2nd>();
+        default:
+            jassertfalse;
+            return std::make_unique<WDFRCBandPass1st>();
+        }
 
     default:
         jassertfalse; // Unknown filter type
