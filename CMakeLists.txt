@@ -46,3 +46,4 @@ else()
 endif()
 
 add_subdirectory(plugins/WDFilters)
+add_subdirectory(plugins/DiodeClipper)
