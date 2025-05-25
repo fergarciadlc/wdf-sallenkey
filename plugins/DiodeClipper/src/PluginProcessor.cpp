@@ -10,8 +10,8 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
 #endif
                          .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
-                         ),
-      apvts(*this, nullptr, "Parameters", createParameterLayout())
+                         )
+    , apvts(*this, nullptr, "Parameters", createParameterLayout())
 {}
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor() {}

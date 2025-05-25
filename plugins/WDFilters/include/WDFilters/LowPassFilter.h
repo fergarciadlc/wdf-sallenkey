@@ -13,9 +13,13 @@ class WDFRCLowPass : public WDFilter
 {
 public:
     WDFRCLowPass()
-        : r1(1.0e3),  // will be overridden in setCutoff()
-          c1(1.0e-6), // 1 uF -> keeps math easy
-          s1(r1, c1), inverter(s1), vin(s1)
+        : r1(1.0e3)
+        , // will be overridden in setCutoff()
+        c1(1.0e-6)
+        , // 1 uF -> keeps math easy
+        s1(r1, c1)
+        , inverter(s1)
+        , vin(s1)
     {}
 
     // WDFilter API

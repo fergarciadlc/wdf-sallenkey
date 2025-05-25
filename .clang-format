@@ -13,6 +13,10 @@ ConstructorInitializerIndentWidth: 4
 AllowShortFunctionsOnASingleLine: Inline
 SeparateDefinitionBlocks: Always    # needs clang-format 17+
 
+# --- constructor-initializer lists ---------------------------------
+PackConstructorInitializers: Never      # always break – one per line
+BreakConstructorInitializers: BeforeComma   # “, nextInit” layout
+
 # --- brace wrapping ---
 BreakBeforeBraces:       Custom     # must be 'Custom' when BraceWrapping block present
 BraceWrapping:

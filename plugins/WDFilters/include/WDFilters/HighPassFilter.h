@@ -12,10 +12,14 @@ class WDFRCHighPass : public WDFilter
 {
 public:
     WDFRCHighPass()
-        : c1(1.0e-6), // 1 uF (fixed)
-          r1(1.0e3),  // tuned by setCutoff()
-          s1(c1, r1), // series C -> R
-          inverter(s1), vin(s1)
+        : c1(1.0e-6)
+        , // 1 uF (fixed)
+        r1(1.0e3)
+        , // tuned by setCutoff()
+        s1(c1, r1)
+        , // series C -> R
+        inverter(s1)
+        , vin(s1)
     {}
 
     // WDFilter API
