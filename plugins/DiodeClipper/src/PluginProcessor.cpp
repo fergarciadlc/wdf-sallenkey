@@ -10,10 +10,30 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
 #endif
                          .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
-      )
+                         ),
+      apvts(*this, nullptr, "Parameters", createParameterLayout())
 {}
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor() {}
+
+juce::AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createParameterLayout()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("cutoff",
+                                                           "Cutoff",
+                                                           juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f, 0.1f),
+                                                           1000.0f,
+                                                           "Hz"));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("numSeriesDiodes",
+                                                           "Series Diodes",
+                                                           juce::NormalisableRange<float>{1.0f, 8.0f, 0.01f},
+                                                           2.0f,
+                                                           "N"));
+
+    return layout;
+}
 
 //==============================================================================
 const juce::String AudioPluginAudioProcessor::getName() const
@@ -86,6 +106,8 @@ void AudioPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerB
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
     juce::ignoreUnused(sampleRate, samplesPerBlock);
+
+    diodeClipper.prepare(sampleRate);
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -118,34 +140,28 @@ bool AudioPluginAudioProcessor::isBusesLayoutSupported(const BusesLayout& layout
 #endif
 }
 
+void AudioPluginAudioProcessor::updateParameters()
+{
+    auto            cutoffHz        = apvts.getRawParameterValue("cutoff")->load();
+    auto            numSeriesDiodes = apvts.getRawParameterValue("numSeriesDiodes")->load();
+    constexpr float defaultIs       = 2.52e-9f;
+
+    diodeClipper.setParameters(cutoffHz, defaultIs, numSeriesDiodes, false);
+}
+
 void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ignoreUnused(midiMessages);
+    updateParameters();
 
-    juce::ScopedNoDenormals noDenormals;
-    auto                    totalNumInputChannels  = getTotalNumInputChannels();
-    auto                    totalNumOutputChannels = getTotalNumOutputChannels();
-
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear(i, 0, buffer.getNumSamples());
-
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
     {
-        auto* channelData = buffer.getWritePointer(channel);
-        juce::ignoreUnused(channelData);
-        // ..do something to the data...
+        for (int i = 0; i < buffer.getNumSamples(); ++i)
+        {
+            auto x = buffer.getSample(channel, i);
+            auto y = diodeClipper.processSample(x);
+            buffer.setSample(channel, i, y);
+        }
     }
 }
 
@@ -157,7 +173,8 @@ bool AudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
-    return new AudioPluginAudioProcessorEditor(*this);
+    // return new AudioPluginAudioProcessorEditor(*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================

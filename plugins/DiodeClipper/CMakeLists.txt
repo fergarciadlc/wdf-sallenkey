@@ -20,6 +20,7 @@ target_sources(${PLUGIN_PROJECT}
     PRIVATE
         src/PluginEditor.cpp
         src/PluginProcessor.cpp
+        src/WDFDiodeClipper.cpp
 )
 
 target_include_directories(${PLUGIN_PROJECT}
