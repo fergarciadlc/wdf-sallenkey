@@ -1,7 +1,8 @@
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
+set(PLUGIN_NAME WDFilters)
 
 juce_add_plugin(
-    ${PROJECT_NAME}
+    ${PLUGIN_NAME}
     COMPANY_NAME              "Music Technology Group - S105"
     BUNDLE_ID                 "com.MusicTechnologyGroup.WDFilters"
     IS_SYNTH                  FALSE
@@ -15,21 +16,21 @@ juce_add_plugin(
     PRODUCT_NAME              "WD Filters"
 )
 
-target_sources(${PROJECT_NAME}
+target_sources(${PLUGIN_NAME}
     PRIVATE
         src/PluginEditor.cpp
         src/PluginProcessor.cpp
         src/WDFilter.cpp
 )
 
-target_include_directories(${PROJECT_NAME}
+target_include_directories(${PLUGIN_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 
 target_compile_definitions(
-    ${PROJECT_NAME}
+    ${PLUGIN_NAME}
     PUBLIC
         JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0
@@ -37,7 +38,7 @@ target_compile_definitions(
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-    target_compile_options(${PROJECT_NAME} PRIVATE
+    target_compile_options(${PLUGIN_NAME} PRIVATE
         -Wno-error=shadow-field-in-constructor
         -Wno-error=implicit-float-conversion
         -Wno-error=shadow
@@ -51,7 +52,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
 endif()
 
 target_link_libraries(
-    ${PROJECT_NAME}
+    ${PLUGIN_NAME}
     PRIVATE
         # AudioPluginData           # If we'd created a binary data target, we'd link to it here
         juce::juce_audio_processors

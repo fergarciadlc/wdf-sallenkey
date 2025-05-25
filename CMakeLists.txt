@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(WDFiltersPlugin VERSION 0.1.0)
+project(WaveDigitalFiltersPlugins VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -45,4 +45,4 @@ else()
     set(PLUGIN_INSTALL_DIR "")  # no copy
 endif()
 
-add_subdirectory(plugin)
+add_subdirectory(plugins/WDFilters)
