@@ -13,7 +13,7 @@ juce_add_plugin(
     COPY_PLUGIN_AFTER_BUILD   ${COPY_PLUGIN_AFTER_BUILD}
     PLUGIN_INSTALL_DIR        "${PLUGIN_INSTALL_DIR}"
     FORMATS                   ${PLUGIN_FORMATS}
-    PRODUCT_NAME              "WD Filters"
+    PRODUCT_NAME              "WDF Filters"
 )
 
 target_sources(${PLUGIN_PROJECT}
