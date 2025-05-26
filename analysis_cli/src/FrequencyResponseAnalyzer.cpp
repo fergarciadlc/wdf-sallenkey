@@ -28,7 +28,7 @@ calculateFrequencyResponse(std::unique_ptr<WDFilter>& filter, double sampleRate,
 
     // Prepare our FFT objects
     juce::dsp::FFT     forwardFFT(fftOrder);
-    std::vector<float> fftInputData(static_cast<size_t>(fftSize * 2), 0.0f); // Complex input (real/imag pairs)
+    std::vector<float> fftInputData(static_cast<size_t>(fftSize), 0.0f); // Only real input needed
 
     // Create an impulse signal
     fftInputData[0] = 1.0f; // Impulse at sample 0
@@ -36,14 +36,12 @@ calculateFrequencyResponse(std::unique_ptr<WDFilter>& filter, double sampleRate,
     // Pass the impulse through the filter
     for (int i = 0; i < fftSize; ++i)
     {
-        // Process only the real part (even indices)
-        const size_t idx   = static_cast<size_t>(i * 2);
-        float        value = static_cast<float>(filter->processSample(fftInputData[idx]));
-        fftInputData[idx]  = value;
+        float value     = static_cast<float>(filter->processSample(fftInputData[i]));
+        fftInputData[i] = value;
     }
 
-    // Perform the FFT
-    forwardFFT.performRealOnlyForwardTransform(fftInputData.data(), true);
+    // Perform the FFT (magnitude only)
+    forwardFFT.performFrequencyOnlyForwardTransform(fftInputData.data(), true);
 
     // Calculate magnitude spectrum and convert to dB
     std::vector<double> frequencies;
@@ -56,34 +54,14 @@ calculateFrequencyResponse(std::unique_ptr<WDFilter>& filter, double sampleRate,
 
     // Find the maximum magnitude to normalize to 0 dB
     double maxMagnitude = 0.0;
-
     for (int i = 0; i < numBins; ++i)
-    {
-        const size_t idx       = static_cast<size_t>(i * 2);
-        const float  real      = fftInputData[idx];
-        const float  imag      = fftInputData[idx + 1];
-        double       magnitude = std::sqrt(real * real + imag * imag);
-
-        if (magnitude > maxMagnitude)
-            maxMagnitude = magnitude;
-    }
+        maxMagnitude = std::max(maxMagnitude, static_cast<double>(fftInputData[i]));
 
     // Calculate the frequencies and normalized magnitude in dB
     for (int i = 0; i < numBins; ++i)
     {
-        // Calculate frequency in Hz for this bin
-        double frequency = i * sampleRate / fftSize;
-
-        // Get magnitude
-        const size_t idx       = static_cast<size_t>(i * 2);
-        const float  real      = fftInputData[idx];
-        const float  imag      = fftInputData[idx + 1];
-        double       magnitude = std::sqrt(real * real + imag * imag);
-
-        // Convert to dB, normalized to 0 dB max
-        double magnitudeDB = 20.0 * std::log10(magnitude / maxMagnitude);
-
-        // Add to our result vectors
+        double frequency   = i * sampleRate / fftSize;
+        double magnitudeDB = 20.0 * std::log10(fftInputData[i] / maxMagnitude);
         frequencies.push_back(frequency);
         magnitudes.push_back(magnitudeDB);
     }
