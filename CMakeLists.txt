@@ -47,3 +47,4 @@ endif()
 
 add_subdirectory(plugins/WDFilters)
 add_subdirectory(plugins/DiodeClipper)
+add_subdirectory(analysis_cli)
