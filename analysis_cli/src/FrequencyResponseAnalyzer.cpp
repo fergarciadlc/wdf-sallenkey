@@ -46,7 +46,8 @@ calculateFrequencyResponse(std::unique_ptr<WDFilter>& filter, double sampleRate,
         maxMag = std::max(maxMag, static_cast<double>(std::hypot(fftData[2 * k], fftData[2 * k + 1])));
 
     // Calculate frequency response with phase unwrapping
-    double prev = 0.0; // unwrap helper
+    double       prev    = 0.0;   // unwrap helper
+    const double epsilon = 1e-10; // Small value to prevent log(0)
     for (int k = 0; k < numBins; ++k)
     {
         const float re = fftData[2 * k];
@@ -64,7 +65,7 @@ calculateFrequencyResponse(std::unique_ptr<WDFilter>& filter, double sampleRate,
         prev = ph;
 
         freq[k]     = k * sampleRate / fftSize;
-        magDb[k]    = 20.0 * std::log10(mag / maxMag);
+        magDb[k]    = 20.0 * std::log10((mag + epsilon) / maxMag);
         phaseDeg[k] = ph * 180.0 / M_PI;
     }
 

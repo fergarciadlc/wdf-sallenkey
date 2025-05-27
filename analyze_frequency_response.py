@@ -146,16 +146,25 @@ def analyze_filter_parameters(data):
     cutoff_freq = data["frequency_hz"].iloc[cutoff_idx]
 
     # Calculate passband ripple (variation in passband)
-    passband_mask = data["frequency_hz"] <= cutoff_freq
-    passband_ripple = np.max(data["magnitude_db"][passband_mask]) - np.min(
-        data["magnitude_db"][passband_mask]
-    )
+    # Exclude DC bin and use frequencies up to cutoff
+    passband_mask = (data["frequency_hz"] > 0) & (data["frequency_hz"] <= cutoff_freq)
+    if np.any(passband_mask):
+        passband_ripple = np.max(data["magnitude_db"][passband_mask]) - np.min(
+            data["magnitude_db"][passband_mask]
+        )
+    else:
+        passband_ripple = 0.0
 
     # Calculate stopband attenuation
-    stopband_mask = (
-        data["frequency_hz"] > cutoff_freq * 2
-    )  # Consider frequencies above 2x cutoff
-    stopband_attenuation = -np.min(data["magnitude_db"][stopband_mask])
+    # Use frequencies above 2x cutoff and below Nyquist
+    nyquist = data["frequency_hz"].iloc[-1]
+    stopband_mask = (data["frequency_hz"] > cutoff_freq * 2) & (
+        data["frequency_hz"] < nyquist
+    )
+    if np.any(stopband_mask):
+        stopband_attenuation = -np.min(data["magnitude_db"][stopband_mask])
+    else:
+        stopband_attenuation = 0.0
 
     return {
         "Cutoff Frequency (Hz)": cutoff_freq,

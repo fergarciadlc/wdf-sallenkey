@@ -49,11 +49,10 @@ def calculate_frequency_response(
     # Calculate magnitude spectrum and convert to dB
     magnitudes = np.abs(spectrum)
     max_magnitude = np.max(magnitudes)
-    magnitudes_db = 20 * np.log10(magnitudes / max_magnitude)
+    epsilon = 1e-10  # Small value to prevent log(0)
+    magnitudes_db = 20 * np.log10((magnitudes + epsilon) / max_magnitude)
 
     # Calculate phase and unwrap
-    # phases = np.angle(spectrum, deg=True)  # Get phase in degrees
-    # phases = np.unwrap(phases)  # Unwrap phase to ensure continuity
     phases = np.unwrap(np.angle(spectrum)) * 180 / np.pi
 
     return frequencies, magnitudes_db, phases
@@ -151,7 +150,7 @@ def main():
         write_csv(output_dir / filename, frequencies, magnitudes, phases)
         print(f"Generated {filename}")
 
-    print("Frequency response analysis complete.")
+    print("Frequency response analysis complete!")
 
 
 if __name__ == "__main__":
