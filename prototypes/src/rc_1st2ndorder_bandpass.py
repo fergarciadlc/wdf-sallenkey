@@ -2,10 +2,11 @@
 from typing import Iterable
 import numpy as np
 import matplotlib.pyplot as plt
+from pywdf.core.circuit import Circuit
 
 # Import the low-pass and high-pass filters already created
-from prototypes.src.rc_lowpass import RCLowPass
-from prototypes.src.rc_highpass import RCHighPass
+from .rc_lowpass import RCLowPass
+from .rc_highpass import RCHighPass
 
 class RCBandPass1st(Circuit):
     """First-order RC band-pass filter implemented by cascading high-pass and low-pass filters.
