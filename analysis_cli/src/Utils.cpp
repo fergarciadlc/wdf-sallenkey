@@ -26,7 +26,6 @@ namespace utils
     bool
     writeCSV(const fs::path& filePath, const std::vector<double>& frequencies, const std::vector<double>& magnitudes)
     {
-
         if (frequencies.size() != magnitudes.size())
         {
             std::cerr << "Error: Frequency and magnitude vectors must have the same size." << std::endl;
@@ -42,7 +41,7 @@ namespace utils
                 return false;
             }
 
-            file << "Frequency (Hz),Magnitude (dB)" << std::endl;
+            file << "frequency_hz,magnitude_db" << std::endl;
 
             for (size_t i = 0; i < frequencies.size(); ++i)
             {
@@ -198,10 +197,9 @@ namespace utils
 
     std::string generateFilename(const std::string& filterType, int filterOrder, double cutoffFrequency)
     {
-        // Format: <type>_<order>order_<cutoff>Hz.csv
-        std::string orderStr = (filterOrder == 1) ? "1st" : "2nd";
-        std::string filename =
-            filterType + "_" + orderStr + "order_" + std::to_string(static_cast<int>(cutoffFrequency)) + "Hz.csv";
+        // Format: chowdsp_wdf_<type>_order<order>_<cutoff>Hz.csv
+        std::string filename = "chowdsp_wdf_" + filterType + "_order" + std::to_string(filterOrder) + "_" +
+                               std::to_string(static_cast<int>(cutoffFrequency)) + "Hz.csv";
 
         return filename;
     }

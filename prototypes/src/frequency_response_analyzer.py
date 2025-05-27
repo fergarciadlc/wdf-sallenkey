@@ -66,7 +66,7 @@ def write_csv(filename: Path, frequencies: np.ndarray, magnitudes: np.ndarray) -
     """
     with open(filename, 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['Frequency (Hz)', 'Magnitude (dB)'])
+        writer.writerow(['frequency_hz', 'magnitude_db'])
         for freq, mag in zip(frequencies, magnitudes):
             writer.writerow([freq, mag])
 
@@ -88,7 +88,7 @@ def generate_filename(filter_type: str, order: int, cutoff_freq: float) -> str:
     str
         Generated filename
     """
-    return f"{filter_type}_order{order}_{int(cutoff_freq)}Hz.csv"
+    return f"pywdf_{filter_type}_order{order}_{int(cutoff_freq)}Hz.csv"
 
 def main():
     # Define constants
