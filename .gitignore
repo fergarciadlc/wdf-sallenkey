@@ -1,6 +1,9 @@
 # VSCode
 .vscode/
 
+# csv files
+*.csv
+
 # Python
 __pycache__/
 *.py[cod]
