@@ -1,9 +1,10 @@
 # %% [markdown]
 # # Frequency Response Analysis
 #
-# This notebook analyzes and compares the frequency response data from both Python and C++ implementations of the Sallen-Key filter.
+# This notebook analyzes and compares the frequency response data from multiple implementations of the Sallen-Key filter.
 
 from pathlib import Path
+from typing import Any, Dict, List
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,13 +22,13 @@ sns.set_theme()  # This will set seaborn's default theme
 
 
 # %%
-def load_frequency_data(file_path):
+def load_frequency_data(file_path: str) -> pd.DataFrame:
     """Load frequency response data from a CSV file."""
     df = pd.read_csv(file_path)
     return df
 
 
-def analyze_filter_parameters(data):
+def analyze_filter_parameters(data: pd.DataFrame) -> Dict[str, float]:
     """Analyze key filter parameters from frequency response data."""
     # Find cutoff frequency (where magnitude is -3dB)
     cutoff_idx = np.argmin(np.abs(data["magnitude_db"] + 3))
@@ -61,87 +62,102 @@ def analyze_filter_parameters(data):
     }
 
 
-def calculate_error_metrics(python_data, cpp_data):
-    """Calculate error metrics between Python and C++ implementations."""
-    # Ensure we're comparing the same frequency points
-    common_freq = np.intersect1d(python_data["frequency_hz"], cpp_data["frequency_hz"])
+def calculate_error_metrics(
+    implementations: List[Dict[str, Any]],
+) -> Dict[str, Dict[str, float]]:
+    """Calculate error metrics between all pairs of implementations."""
+    metrics = {}
 
-    python_mag = python_data[python_data["frequency_hz"].isin(common_freq)][
-        "magnitude_db"
-    ].values
-    cpp_mag = cpp_data[cpp_data["frequency_hz"].isin(common_freq)][
-        "magnitude_db"
-    ].values
+    # Compare each pair of implementations
+    for i, impl1 in enumerate(implementations):
+        for j, impl2 in enumerate(implementations[i + 1 :], i + 1):
+            name1, name2 = impl1["name"], impl2["name"]
+            data1, data2 = impl1["data"], impl2["data"]
 
-    python_phase = python_data[python_data["frequency_hz"].isin(common_freq)][
-        "phase_degrees"
-    ].values
-    cpp_phase = cpp_data[cpp_data["frequency_hz"].isin(common_freq)][
-        "phase_degrees"
-    ].values
+            # Ensure we're comparing the same frequency points
+            common_freq = np.intersect1d(data1["frequency_hz"], data2["frequency_hz"])
 
-    # Calculate metrics
-    mag_mae = np.mean(np.abs(python_mag - cpp_mag))
-    mag_rmse = np.sqrt(np.mean((python_mag - cpp_mag) ** 2))
+            mag1 = data1[data1["frequency_hz"].isin(common_freq)]["magnitude_db"].values
+            mag2 = data2[data2["frequency_hz"].isin(common_freq)]["magnitude_db"].values
 
-    phase_mae = np.mean(np.abs(python_phase - cpp_phase))
-    phase_rmse = np.sqrt(np.mean((python_phase - cpp_phase) ** 2))
+            phase1 = data1[data1["frequency_hz"].isin(common_freq)][
+                "phase_degrees"
+            ].values
+            phase2 = data2[data2["frequency_hz"].isin(common_freq)][
+                "phase_degrees"
+            ].values
 
-    return {
-        "Magnitude MAE": mag_mae,
-        "Magnitude RMSE": mag_rmse,
-        "Phase MAE": phase_mae,
-        "Phase RMSE": phase_rmse,
-    }
+            # Calculate metrics
+            mag_mae = np.mean(np.abs(mag1 - mag2))
+            mag_rmse = np.sqrt(np.mean((mag1 - mag2) ** 2))
+
+            phase_mae = np.mean(np.abs(phase1 - phase2))
+            phase_rmse = np.sqrt(np.mean((phase1 - phase2) ** 2))
+
+            pair_name = f"{name1} vs {name2}"
+            metrics[pair_name] = {
+                "Magnitude MAE": mag_mae,
+                "Magnitude RMSE": mag_rmse,
+                "Phase MAE": phase_mae,
+                "Phase RMSE": phase_rmse,
+            }
+
+    return metrics
 
 
-def plot_frequency_response(python_data, cpp_data):
-    """Plot frequency response comparison between Python and C++ implementations."""
+def plot_frequency_response(implementations: List[Dict[str, Any]]):
+    """Plot frequency response comparison between multiple implementations."""
     plt.figure(figsize=(12, 8))
+
+    # Define colors and line styles for different implementations
+    colors = ["b", "r", "g", "c", "m", "y"]
+    line_styles = ["-", "--", ":", "-."]
 
     # Plot magnitude response
     plt.subplot(2, 1, 1)
 
-    # Plot the responses
-    plt.semilogx(
-        python_data["frequency_hz"], python_data["magnitude_db"], "b-", label="Python"
-    )
-    plt.semilogx(cpp_data["frequency_hz"], cpp_data["magnitude_db"], "r--", label="C++")
+    # Plot each implementation
+    for i, impl in enumerate(implementations):
+        color = colors[i % len(colors)]
+        style = line_styles[i % len(line_styles)]
+        plt.semilogx(
+            impl["data"]["frequency_hz"],
+            impl["data"]["magnitude_db"],
+            f"{color}{style}",
+            label=impl["name"],
+        )
 
-    # Find and plot cutoff frequency
-    cutoff_idx = np.argmin(np.abs(python_data["magnitude_db"] + 3))
-    cutoff_freq = python_data["frequency_hz"].iloc[cutoff_idx]
-    plt.axvline(x=cutoff_freq, color="g", linestyle=":", label="Cutoff (-3dB)")
+    # Use first implementation for reference lines and regions
+    ref_data = implementations[0]["data"]
+    cutoff_idx = np.argmin(np.abs(ref_data["magnitude_db"] + 3))
+    cutoff_freq = ref_data["frequency_hz"].iloc[cutoff_idx]
+    nyquist = ref_data["frequency_hz"].iloc[-1]
 
-    # Shade passband and stopband regions
-    nyquist = python_data["frequency_hz"].iloc[-1]
+    # Add reference lines and regions
+    plt.axvline(x=cutoff_freq, color="k", linestyle=":", label="Cutoff (-3dB)")
     plt.axvspan(0, cutoff_freq, alpha=0.2, color="g", label="Passband")
     plt.axvspan(cutoff_freq * 2, nyquist, alpha=0.2, color="r", label="Stopband")
 
-    # Add annotations for key parameters
-    python_params = analyze_filter_parameters(python_data)
-    cpp_params = analyze_filter_parameters(cpp_data)
-
-    # Add text box with parameters
-    textstr = "\n".join(
-        (
-            f"Python:",
-            f'Cutoff: {python_params["Cutoff Frequency (Hz)"]:.1f} Hz',
-            f'Ripple: {python_params["Passband Ripple (dB)"]:.1f} dB',
-            f'Atten: {python_params["Stopband Attenuation (dB)"]:.1f} dB',
-            f"\nC++:",
-            f'Cutoff: {cpp_params["Cutoff Frequency (Hz)"]:.1f} Hz',
-            f'Ripple: {cpp_params["Passband Ripple (dB)"]:.1f} dB',
-            f'Atten: {cpp_params["Stopband Attenuation (dB)"]:.1f} dB',
+    # Add text box with parameters for each implementation
+    textstr = []
+    for impl in implementations:
+        params = analyze_filter_parameters(impl["data"])
+        textstr.extend(
+            [
+                f'{impl["name"]}:',
+                f'Cutoff: {params["Cutoff Frequency (Hz)"]:.1f} Hz',
+                f'Ripple: {params["Passband Ripple (dB)"]:.1f} dB',
+                f'Atten: {params["Stopband Attenuation (dB)"]:.1f} dB',
+                "",
+            ]
         )
-    )
 
     # Place text box in upper right
     props = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
     plt.text(
         0.95,
         0.95,
-        textstr,
+        "\n".join(textstr),
         transform=plt.gca().transAxes,
         fontsize=8,
         verticalalignment="top",
@@ -154,22 +170,24 @@ def plot_frequency_response(python_data, cpp_data):
     plt.ylabel("Magnitude (dB)")
     plt.title("Magnitude Response Comparison")
     plt.legend(loc="lower left")
-    plt.xlim(20, 20000)
-    plt.ylim(-20, 5)  # Set y-axis limits for better visibility
+    plt.xlim(20, 20000)  # Set x-axis limits to audio range
 
     # Plot phase response
     plt.subplot(2, 1, 2)
-    plt.semilogx(
-        python_data["frequency_hz"], python_data["phase_degrees"], "b-", label="Python"
-    )
-    plt.semilogx(
-        cpp_data["frequency_hz"], cpp_data["phase_degrees"], "r--", label="C++"
-    )
 
-    # Add cutoff frequency line to phase plot
-    plt.axvline(x=cutoff_freq, color="g", linestyle=":", label="Cutoff (-3dB)")
+    # Plot each implementation
+    for i, impl in enumerate(implementations):
+        color = colors[i % len(colors)]
+        style = line_styles[i % len(line_styles)]
+        plt.semilogx(
+            impl["data"]["frequency_hz"],
+            impl["data"]["phase_degrees"],
+            f"{color}{style}",
+            label=impl["name"],
+        )
 
-    # Shade passband and stopband regions in phase plot
+    # Add reference lines and regions
+    plt.axvline(x=cutoff_freq, color="k", linestyle=":", label="Cutoff (-3dB)")
     plt.axvspan(0, cutoff_freq, alpha=0.2, color="g", label="Passband")
     plt.axvspan(cutoff_freq * 2, nyquist, alpha=0.2, color="r", label="Stopband")
 
@@ -187,53 +205,62 @@ def plot_frequency_response(python_data, cpp_data):
 # %% [markdown]
 # ## Load and Process Data
 #
-# Let's load the frequency response data from both implementations and process it for comparison.
+# Let's load the frequency response data from all implementations and process it for comparison.
 
 # %%
-# Load data from both implementations
-python_data = load_frequency_data("frequency_responses/pywdf_LowPass_order1_1000Hz.csv")
-cpp_data = load_frequency_data(
-    "frequency_responses/chowdsp_wdf_LowPass_order1_1000Hz.csv"
-)
+# Define implementations to compare
+implementations = [
+    {
+        "name": "C++ chowdsp_wdf",
+        "csv_path": "frequency_responses/chowdsp_wdf_BandPass_order1_1000Hz.csv",
+    },
+    {
+        "name": "Python pywdf",
+        "csv_path": "frequency_responses/pywdf_BandPass_order1_1000Hz.csv",
+    },
+    # Add LTSpice implementation when available
+    {
+        "name": "LTSpice simulation",
+        "csv_path": "frequency_responses/pywdf_BandPass_order1_1000Hz.csv",
+    },
+]
 
-# Display the first few rows of each dataset
-print("Python Implementation Data:")
-display(python_data.head())
-print("\nC++ Implementation Data:")
-display(cpp_data.head())
+# Load data for each implementation
+for impl in implementations:
+    impl["data"] = load_frequency_data(impl["csv_path"])
+    print(f"\n{impl['name']} Data:")
+    display(impl["data"].head())
 
 # %% [markdown]
 # ## Compare Frequency Responses
 #
-# Let's create plots to compare the frequency responses from both implementations.
+# Let's create plots to compare the frequency responses from all implementations.
 
 # %%
-plot_frequency_response(python_data, cpp_data)
+plot_frequency_response(implementations)
 
 # %% [markdown]
 # ## Calculate Error Metrics
 #
-# Let's calculate some error metrics to quantify the differences between the implementations.
+# Let's calculate error metrics to quantify the differences between all pairs of implementations.
 
 # %%
-error_metrics = calculate_error_metrics(python_data, cpp_data)
+error_metrics = calculate_error_metrics(implementations)
 print("Error Metrics:")
-for metric, value in error_metrics.items():
-    print(f"{metric}: {value:.6f}")
+for pair, metrics in error_metrics.items():
+    print(f"\n{pair}:")
+    for metric, value in metrics.items():
+        print(f"{metric}: {value:.6f}")
 
 # %% [markdown]
 # ## Analyze Key Filter Parameters
 #
-# Let's analyze key filter parameters such as cutoff frequency, passband ripple, and stopband attenuation.
+# Let's analyze key filter parameters for each implementation.
 
 # %%
-print("Python Implementation Parameters:")
-python_params = analyze_filter_parameters(python_data)
-for param, value in python_params.items():
-    print(f"{param}: {value:.2f}")
-
-print("\nC++ Implementation Parameters:")
-cpp_params = analyze_filter_parameters(cpp_data)
-for param, value in cpp_params.items():
-    print(f"{param}: {value:.2f}")
+for impl in implementations:
+    print(f"\n{impl['name']} Parameters:")
+    params = analyze_filter_parameters(impl["data"])
+    for param, value in params.items():
+        print(f"{param}: {value:.2f}")
 # %%
