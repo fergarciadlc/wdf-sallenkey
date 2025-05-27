@@ -18,55 +18,57 @@
  * @param filter Pointer to the filter to analyze
  * @param sampleRate Sample rate in Hz
  * @param fftOrder FFT order (power of 2)
- * @return Pair of vectors containing frequencies and magnitudes (in dB)
+ * @return Tuple containing frequencies, magnitudes (in dB), and phases (in degrees)
  */
-// Forward declaration
-static std::pair<std::vector<double>, std::vector<double>>
+static std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>
 calculateFrequencyResponse(std::unique_ptr<WDFilter>& filter, double sampleRate, int fftOrder)
 {
-    const int fftSize = 1 << fftOrder; // 2^fftOrder
+    const int      fftSize = 1 << fftOrder;
+    juce::dsp::FFT fft(fftOrder);
 
-    // Prepare our FFT objects
-    juce::dsp::FFT     forwardFFT(fftOrder);
-    std::vector<float> fftInputData(static_cast<size_t>(fftSize), 0.0f); // Only real input needed
+    // Create buffer for FFT (2x size for complex output)
+    std::vector<float> fftData(static_cast<size_t>(2 * fftSize), 0.0f);
 
-    // Create an impulse signal
-    fftInputData[0] = 1.0f; // Impulse at sample 0
+    // Generate contiguous impulse response in the first half
+    fftData[0] = 1.0f; // impulse
+    for (int n = 0; n < fftSize; ++n)
+        fftData[n] = filter->processSample(fftData[n]);
 
-    // Pass the impulse through the filter
-    for (int i = 0; i < fftSize; ++i)
+    // Perform FFT (with scaling)
+    fft.performRealOnlyForwardTransform(fftData.data(), true);
+
+    const int           numBins = fftSize / 2;
+    std::vector<double> freq(numBins), magDb(numBins), phaseDeg(numBins);
+
+    // Find maximum magnitude for normalization
+    double maxMag = 0.0;
+    for (int k = 0; k < numBins; ++k)
+        maxMag = std::max(maxMag, static_cast<double>(std::hypot(fftData[2 * k], fftData[2 * k + 1])));
+
+    // Calculate frequency response with phase unwrapping
+    double prev = 0.0; // unwrap helper
+    for (int k = 0; k < numBins; ++k)
     {
-        float value     = static_cast<float>(filter->processSample(fftInputData[i]));
-        fftInputData[i] = value;
+        const float re = fftData[2 * k];
+        const float im = fftData[2 * k + 1];
+
+        const double mag = std::hypot(re, im);
+        double       ph  = std::atan2(im, re); // rad
+
+        // Unwrap phase to ensure continuity
+        double delta = ph - prev;
+        if (delta > M_PI)
+            ph -= 2 * M_PI;
+        else if (delta < -M_PI)
+            ph += 2 * M_PI;
+        prev = ph;
+
+        freq[k]     = k * sampleRate / fftSize;
+        magDb[k]    = 20.0 * std::log10(mag / maxMag);
+        phaseDeg[k] = ph * 180.0 / M_PI;
     }
 
-    // Perform the FFT (magnitude only)
-    forwardFFT.performFrequencyOnlyForwardTransform(fftInputData.data(), true);
-
-    // Calculate magnitude spectrum and convert to dB
-    std::vector<double> frequencies;
-    std::vector<double> magnitudes;
-
-    // We only need the first half of the FFT result (Nyquist limit)
-    const int numBins = fftSize / 2;
-    frequencies.reserve(static_cast<size_t>(numBins));
-    magnitudes.reserve(static_cast<size_t>(numBins));
-
-    // Find the maximum magnitude to normalize to 0 dB
-    double maxMagnitude = 0.0;
-    for (int i = 0; i < numBins; ++i)
-        maxMagnitude = std::max(maxMagnitude, static_cast<double>(fftInputData[i]));
-
-    // Calculate the frequencies and normalized magnitude in dB
-    for (int i = 0; i < numBins; ++i)
-    {
-        double frequency   = i * sampleRate / fftSize;
-        double magnitudeDB = 20.0 * std::log10(fftInputData[i] / maxMagnitude);
-        frequencies.push_back(frequency);
-        magnitudes.push_back(magnitudeDB);
-    }
-
-    return {frequencies, magnitudes};
+    return {freq, magDb, phaseDeg};
 }
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
@@ -93,9 +95,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         filter->prepare(sampleRate);
         filter->setCutoff(cutoffFreq);
 
-        auto [frequencies, magnitudes] = calculateFrequencyResponse(filter, sampleRate, fftOrder);
-        std::string filename           = utils::generateFilename("LowPass", 1, cutoffFreq);
-        utils::writeCSV(outputDir / filename, frequencies, magnitudes);
+        auto [frequencies, magnitudes, phases] = calculateFrequencyResponse(filter, sampleRate, fftOrder);
+        std::string filename                   = utils::generateFilename("LowPass", 1, cutoffFreq);
+        utils::writeCSV(outputDir / filename, frequencies, magnitudes, phases);
         std::cout << "Generated " << filename << std::endl;
     }
 
@@ -104,9 +106,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         filter->prepare(sampleRate);
         filter->setCutoff(cutoffFreq);
 
-        auto [frequencies, magnitudes] = calculateFrequencyResponse(filter, sampleRate, fftOrder);
-        std::string filename           = utils::generateFilename("LowPass", 2, cutoffFreq);
-        utils::writeCSV(outputDir / filename, frequencies, magnitudes);
+        auto [frequencies, magnitudes, phases] = calculateFrequencyResponse(filter, sampleRate, fftOrder);
+        std::string filename                   = utils::generateFilename("LowPass", 2, cutoffFreq);
+        utils::writeCSV(outputDir / filename, frequencies, magnitudes, phases);
         std::cout << "Generated " << filename << std::endl;
     }
 
@@ -116,9 +118,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         filter->prepare(sampleRate);
         filter->setCutoff(cutoffFreq);
 
-        auto [frequencies, magnitudes] = calculateFrequencyResponse(filter, sampleRate, fftOrder);
-        std::string filename           = utils::generateFilename("HighPass", 1, cutoffFreq);
-        utils::writeCSV(outputDir / filename, frequencies, magnitudes);
+        auto [frequencies, magnitudes, phases] = calculateFrequencyResponse(filter, sampleRate, fftOrder);
+        std::string filename                   = utils::generateFilename("HighPass", 1, cutoffFreq);
+        utils::writeCSV(outputDir / filename, frequencies, magnitudes, phases);
         std::cout << "Generated " << filename << std::endl;
     }
 
@@ -127,9 +129,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         filter->prepare(sampleRate);
         filter->setCutoff(cutoffFreq);
 
-        auto [frequencies, magnitudes] = calculateFrequencyResponse(filter, sampleRate, fftOrder);
-        std::string filename           = utils::generateFilename("HighPass", 2, cutoffFreq);
-        utils::writeCSV(outputDir / filename, frequencies, magnitudes);
+        auto [frequencies, magnitudes, phases] = calculateFrequencyResponse(filter, sampleRate, fftOrder);
+        std::string filename                   = utils::generateFilename("HighPass", 2, cutoffFreq);
+        utils::writeCSV(outputDir / filename, frequencies, magnitudes, phases);
         std::cout << "Generated " << filename << std::endl;
     }
 
@@ -139,9 +141,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         filter->prepare(sampleRate);
         filter->setCutoff(cutoffFreq);
 
-        auto [frequencies, magnitudes] = calculateFrequencyResponse(filter, sampleRate, fftOrder);
-        std::string filename           = utils::generateFilename("BandPass", 1, cutoffFreq);
-        utils::writeCSV(outputDir / filename, frequencies, magnitudes);
+        auto [frequencies, magnitudes, phases] = calculateFrequencyResponse(filter, sampleRate, fftOrder);
+        std::string filename                   = utils::generateFilename("BandPass", 1, cutoffFreq);
+        utils::writeCSV(outputDir / filename, frequencies, magnitudes, phases);
         std::cout << "Generated " << filename << std::endl;
     }
 
@@ -150,9 +152,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         filter->prepare(sampleRate);
         filter->setCutoff(cutoffFreq);
 
-        auto [frequencies, magnitudes] = calculateFrequencyResponse(filter, sampleRate, fftOrder);
-        std::string filename           = utils::generateFilename("BandPass", 2, cutoffFreq);
-        utils::writeCSV(outputDir / filename, frequencies, magnitudes);
+        auto [frequencies, magnitudes, phases] = calculateFrequencyResponse(filter, sampleRate, fftOrder);
+        std::string filename                   = utils::generateFilename("BandPass", 2, cutoffFreq);
+        utils::writeCSV(outputDir / filename, frequencies, magnitudes, phases);
         std::cout << "Generated " << filename << std::endl;
     }
 

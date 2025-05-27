@@ -1,6 +1,7 @@
 #include "Utils.h"
 #include <algorithm>
 #include <fstream>
+#include <iomanip>
 
 namespace utils
 {
@@ -23,12 +24,21 @@ namespace utils
         }
     }
 
-    bool
-    writeCSV(const fs::path& filePath, const std::vector<double>& frequencies, const std::vector<double>& magnitudes)
+    bool writeCSV(const fs::path&            filePath,
+                  const std::vector<double>& frequencies,
+                  const std::vector<double>& magnitudes,
+                  const std::vector<double>& phases)
     {
-        if (frequencies.size() != magnitudes.size())
+        // Validate input vectors
+        if (frequencies.size() != magnitudes.size() || frequencies.size() != phases.size())
         {
-            std::cerr << "Error: Frequency and magnitude vectors must have the same size." << std::endl;
+            std::cerr << "Error: Frequency, magnitude, and phase vectors must have the same size." << std::endl;
+            return false;
+        }
+
+        if (frequencies.empty())
+        {
+            std::cerr << "Error: Input vectors cannot be empty." << std::endl;
             return false;
         }
 
@@ -41,11 +51,14 @@ namespace utils
                 return false;
             }
 
-            file << "frequency_hz,magnitude_db" << std::endl;
+            // Write header with units
+            file << "frequency_hz,magnitude_db,phase_degrees" << std::endl;
 
+            // Write data with high precision
+            file << std::fixed << std::setprecision(6);
             for (size_t i = 0; i < frequencies.size(); ++i)
             {
-                file << frequencies[i] << "," << magnitudes[i] << std::endl;
+                file << frequencies[i] << "," << magnitudes[i] << "," << phases[i] << std::endl;
             }
 
             file.close();

@@ -22,12 +22,15 @@ namespace utils
     /**
      * @brief Writes a CSV file with frequency response data
      * @param filePath Path to the CSV file to write
-     * @param frequencies Vector of frequency bins
-     * @param magnitudes Vector of magnitude values in dB
+     * @param frequencies Vector of frequency bins in Hz
+     * @param magnitudes Vector of magnitude values in dB (normalized to 0 dB peak)
+     * @param phases Vector of phase values in degrees (unwrapped)
      * @return True if the file was written successfully
      */
-    bool
-    writeCSV(const fs::path& filePath, const std::vector<double>& frequencies, const std::vector<double>& magnitudes);
+    bool writeCSV(const fs::path&            filePath,
+                  const std::vector<double>& frequencies,
+                  const std::vector<double>& magnitudes,
+                  const std::vector<double>& phases);
 
     /**
      * @brief Writes a CSV file with waveform time-domain data
