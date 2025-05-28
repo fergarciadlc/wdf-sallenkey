@@ -212,16 +212,16 @@ def plot_frequency_response(implementations: List[Dict[str, Any]]):
 implementations = [
     {
         "name": "C++ chowdsp_wdf",
-        "csv_path": "frequency_responses/chowdsp_wdf_BandPass_order1_1000Hz.csv",
+        "csv_path": "../frequency_responses/chowdsp_wdf_BandPass_order1_1000Hz.csv",
     },
     {
         "name": "Python pywdf",
-        "csv_path": "frequency_responses/pywdf_BandPass_order1_1000Hz.csv",
+        "csv_path": "../frequency_responses/pywdf_BandPass_order1_1000Hz.csv",
     },
     # Add LTSpice implementation when available
     {
         "name": "LTSpice simulation",
-        "csv_path": "frequency_responses/pywdf_BandPass_order1_1000Hz.csv",
+        "csv_path": "../frequency_responses/pywdf_BandPass_order1_1000Hz.csv",
     },
 ]
 
