@@ -221,7 +221,7 @@ implementations = [
     # Add LTSpice implementation when available
     {
         "name": "LTSpice simulation",
-        "csv_path": "../frequency_responses/pywdf_BandPass_order1_1000Hz.csv",
+        "csv_path": "../frequency_responses/ltspice_BandPass_order1_1000Hz.csv",
     },
 ]
 
