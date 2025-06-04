@@ -73,13 +73,28 @@ def plot_frequency_response(
     if not show_phase:
         axs = [axs]
     
-    # Define colors and line styles
-    colors = ['b', 'r', 'g', 'c', 'm', 'y']
+    # Define fixed color mapping for implementations
+    implementation_colors = {
+        'chowdsp_wdf': 'b',    # blue
+        'python': 'r',  # red
+        'ltspice': 'g'  # green
+    }
+    
+    # Define line styles
     line_styles = ['-', '--', ':', '-.']
     
+    # Define fixed order for implementations
+    implementation_order = ['chowdsp_wdf', 'python', 'ltspice']
+    
+    # Sort implementations according to fixed order
+    sorted_implementations = sorted(
+        data_dict.items(),
+        key=lambda x: implementation_order.index(x[0].lower()) if x[0].lower() in implementation_order else float('inf')
+    )
+    
     # Plot magnitude response
-    for i, (impl_name, data) in enumerate(data_dict.items()):
-        color = colors[i % len(colors)]
+    for i, (impl_name, data) in enumerate(sorted_implementations):
+        color = implementation_colors.get(impl_name.lower(), 'k')  # default to black if implementation not found
         style = line_styles[i % len(line_styles)]
         axs[0].semilogx(
             data["frequency_hz"],
@@ -109,8 +124,8 @@ def plot_frequency_response(
     
     # Plot phase response if requested
     if show_phase:
-        for i, (impl_name, data) in enumerate(data_dict.items()):
-            color = colors[i % len(colors)]
+        for i, (impl_name, data) in enumerate(sorted_implementations):
+            color = implementation_colors.get(impl_name.lower(), 'k')  # default to black if implementation not found
             style = line_styles[i % len(line_styles)]
             axs[1].semilogx(
                 data["frequency_hz"],
