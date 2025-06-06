@@ -121,3 +121,95 @@ This will:
 - Save the frequency response data in these CSV files
 
 The output files from both implementations can be compared to verify the filter behavior matches between Python and C++.
+
+## Architecture Diagram
+
+```mermaid
+classDiagram
+    %% Base class
+    class WDFilter {
+      <<abstract>>
+      +prepare(Fs: double)
+      +processSample(x: double): double
+      +setCutoff(fc: double)
+      +getCutoff(): double
+      +getType(): Type
+      +getOrder(): Order
+      +static create(type, order): unique_ptr<WDFilter>
+    }
+
+    %% First-/Second-order LP
+    class WDFRCLowPass {
+      +prepare(Fs)
+      +processSample(x)
+      +setCutoff(fc)
+    }
+    class WDFRC2LowPassCascade {
+      +prepare(Fs)
+      +processSample(x)
+      +setCutoff(fc)
+    }
+
+    %% First-/Second-order HP
+    class WDFRCHighPass {
+      +prepare(Fs)
+      +processSample(x)
+      +setCutoff(fc)
+    }
+    class WDFRC2HighPassCascade {
+      +prepare(Fs)
+      +processSample(x)
+      +setCutoff(fc)
+    }
+
+    %% First-/Second-order BP
+    class WDFRCBandPass1st {
+      +prepare(Fs)
+      +processSample(x)
+      +setCutoff(fc)
+      +setBandwidth(oct)
+    }
+    class WDFRCBandPass2nd {
+      +prepare(Fs)
+      +processSample(x)
+      +setCutoff(fc)
+      +setBandwidth(oct)
+    }
+
+    %% Inheritance
+    WDFilter <|-- WDFRCLowPass
+    WDFilter <|-- WDFRC2LowPassCascade
+    WDFilter <|-- WDFRCHighPass
+    WDFilter <|-- WDFRC2HighPassCascade
+    WDFilter <|-- WDFRCBandPass1st
+    WDFilter <|-- WDFRCBandPass2nd
+
+    %% Composition for BP filters
+    WDFRCBandPass1st *-- WDFRCHighPass         : stage1
+    WDFRCBandPass1st *-- WDFRCLowPass          : stage2
+    WDFRCBandPass2nd *-- WDFRC2HighPassCascade : stage1
+    WDFRCBandPass2nd *-- WDFRC2LowPassCascade  : stage2
+```
+
+## Implementation Overview
+
+The `WDFilter` base class defines a uniform interface for all wave-digital filters: methods for `prepare()`, `processSample()`, cutoff control, and runtime instantiation via `create()`. Concrete subclasses implement first- and second-order low-pass, high-pass, and band-pass filters:
+
+- **First-Order Filters** (`WDFRCLowPass`, `WDFRCHighPass`):  
+  Build on WDF elements (resistors, capacitors, series/shunt junctions) from the `chowdsp::wdft` library. Each filter computes its component values in `setCutoff()` using the standard RC formula  
+  \[ R = \frac{1}{2\pi C f_c} \]  
+  with a fixed \( C = 1\mu\text{F} \), and updates on sample-rate changes in `prepare()`.
+
+- **Second-Order Cascades** (`WDFRC2LowPassCascade`, `WDFRC2HighPassCascade`):  
+  Chain two identical first-order stages for a steeper 12 dB/octave slope per stage, achieving 24 dB/octave overall. Both stages share the same cutoff.
+
+- **Band-Pass Filters** (`WDFRCBandPass1st`, `WDFRCBandPass2nd`):  
+  Implemented by cascading a high-pass stage (`stage1`) followed by a low-pass stage (`stage2`). The center frequency (`cutoff`) and bandwidth (in octaves) determine individual HP/LP cutoffs via  
+  \[
+    f_{HP} = \frac{f_0}{\sqrt{2^{\text{BW}}}},\quad
+    f_{LP} = f_0 \sqrt{2^{\text{BW}}}
+  \]
+  with clamping to \([20\text{ Hz}, 0.45\,\mathrm{Fs}]\). An optional auto-gain factor compensates for pass-band level loss.
+
+Together, this hierarchy offers a flexible, WDF-based filter suite with runtime polymorphism, easy instantiation, and consistent behavior across filter types and orders.
+
