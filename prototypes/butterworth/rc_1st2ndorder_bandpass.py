@@ -255,11 +255,9 @@ if __name__ == "__main__":
         idx = np.argmin(np.abs(freqs - freq))
         return np.abs(Y[idx]) / np.abs(X[idx])
 
-
     print("Testing RCBandPass1st")
     bp1 = RCBandPass1st(sample_rate=48_000, center_freq=1000, bandwidth_octaves=1.0)
     bp1.plot_freqz()
-
 
     g1_low = measure_gain(bp1, bp1.hp_stage.cutoff)
     g1_high = measure_gain(bp1, bp1.lp_stage.cutoff)
@@ -280,5 +278,4 @@ if __name__ == "__main__":
         f"Gain @ {hp_cutoff} Hz: {20*np.log10(g2_low):.2f} dB\n"
         f"Gain @ {lp_cutoff} Hz: {20*np.log10(g2_high):.2f} dB"
     )
-
 
