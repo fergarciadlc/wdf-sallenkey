@@ -136,7 +136,7 @@ class RCBandPass2nd(Circuit):
     apply_auto_gain : bool, optional
         Whether to apply automatic gain compensation. Default: True
     """
-    
+
     _K = 1.553  # section-frequency multiplier for Butterworth alignment
 
     def __init__(self, sample_rate: int, center_freq: float,
@@ -241,6 +241,7 @@ class RCBandPass2nd(Circuit):
 
 # Testing
 if __name__ == "__main__":
+
     import numpy as np
 
     def measure_gain(filt: Circuit, freq: float, n: int = 8192) -> float:
