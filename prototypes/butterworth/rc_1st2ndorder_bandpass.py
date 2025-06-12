@@ -136,6 +136,7 @@ class RCBandPass2nd(Circuit):
     apply_auto_gain : bool, optional
         Whether to apply automatic gain compensation. Default: True
     """
+
     _K = 1.553  # section-frequency multiplier for Butterworth alignment
 
     def __init__(self, sample_rate: int, center_freq: float,
@@ -241,10 +242,43 @@ class RCBandPass2nd(Circuit):
 # Testing
 if __name__ == "__main__":
 
+    import numpy as np
+
+    def measure_gain(filt: Circuit, freq: float, n: int = 8192) -> float:
+        t = np.arange(n) / filt.fs
+        x = np.sin(2 * np.pi * freq * t)
+        y = filt.process_block(x)
+
+        freqs = np.fft.rfftfreq(n, 1 / filt.fs)
+        X = np.fft.rfft(x)
+        Y = np.fft.rfft(y)
+        idx = np.argmin(np.abs(freqs - freq))
+        return np.abs(Y[idx]) / np.abs(X[idx])
+
+
     print("Testing RCBandPass1st")
     bp1 = RCBandPass1st(sample_rate=48_000, center_freq=1000, bandwidth_octaves=1.0)
     bp1.plot_freqz()
-    
+
+
+    g1_low = measure_gain(bp1, bp1.hp_stage.cutoff)
+    g1_high = measure_gain(bp1, bp1.lp_stage.cutoff)
+    print(
+        f"Gain @ {bp1.hp_stage.cutoff} Hz: {20*np.log10(g1_low):.2f} dB\n"
+        f"Gain @ {bp1.lp_stage.cutoff} Hz: {20*np.log10(g1_high):.2f} dB"
+    )
+
     print("Testing RCBandPass2nd")
     bp2 = RCBandPass2nd(sample_rate=48_000, center_freq=1000, bandwidth_octaves=1.0)
     bp2.plot_freqz()
+
+    hp_cutoff = bp2.hp_stage1.cutoff / bp2._K
+    lp_cutoff = bp2.lp_stage1.cutoff / bp2._K
+    g2_low = measure_gain(bp2, hp_cutoff)
+    g2_high = measure_gain(bp2, lp_cutoff)
+    print(
+        f"Gain @ {hp_cutoff} Hz: {20*np.log10(g2_low):.2f} dB\n"
+        f"Gain @ {lp_cutoff} Hz: {20*np.log10(g2_high):.2f} dB"
+    )
+
+

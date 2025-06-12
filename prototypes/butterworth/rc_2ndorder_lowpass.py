@@ -7,7 +7,6 @@ if __name__ == "__main__" and __package__ is None:
 
     sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-
 from .rc_lowpass import RCLowPass
 
 __all__ = ["RC2ndOrderLowPass"]
@@ -62,3 +61,27 @@ class RC2ndOrderLowPass:
 
     def AC_transient_analysis(self, *args, **kwargs):
         self._stage2.AC_transient_analysis(*args, **kwargs)
+
+
+if __name__ == "__main__":
+    import numpy as np
+
+    def measure_gain(filt: "RC2ndOrderLowPass", freq: float, n: int = 8192) -> float:
+        """Return magnitude response at *freq* using an FFT based approach."""
+        t = np.arange(n) / filt.fs
+        x = np.sin(2 * np.pi * freq * t)
+        y = filt.process_block(x)
+
+        freqs = np.fft.rfftfreq(n, 1 / filt.fs)
+        X = np.fft.rfft(x)
+        Y = np.fft.rfft(y)
+        idx = np.argmin(np.abs(freqs - freq))
+        return np.abs(Y[idx]) / np.abs(X[idx])
+
+    lp2 = RC2ndOrderLowPass(sample_rate=48_000, cutoff=1_000)
+    lp2.plot_freqz()
+
+    g = measure_gain(lp2, lp2.cutoff)
+    print(f"Gain @ {lp2.cutoff} Hz: {20*np.log10(g):.2f} dB")
+
+
