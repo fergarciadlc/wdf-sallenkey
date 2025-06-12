@@ -129,7 +129,9 @@ class RCBandPass2nd(Circuit):
     apply_auto_gain : bool, optional
         Whether to apply automatic gain compensation. Default: True
     """
-    
+
+    _K = 1.553  # section-frequency multiplier for Butterworth alignment
+
     def __init__(self, sample_rate: int, center_freq: float,
                  bandwidth_octaves: float = 1.0, apply_auto_gain: bool = True):
         self.fs = float(sample_rate)
@@ -197,10 +199,15 @@ class RCBandPass2nd(Circuit):
         hp_cutoff = max(20.0, min(self.fs * 0.45, hp_cutoff))
         lp_cutoff = max(20.0, min(self.fs * 0.45, lp_cutoff))
 
-        self.hp_stage1.set_cutoff(hp_cutoff)
-        self.hp_stage2.set_cutoff(hp_cutoff)
-        self.lp_stage1.set_cutoff(lp_cutoff)
-        self.lp_stage2.set_cutoff(lp_cutoff)
+        # Each stage in a second-order cascade must be tuned above the target
+        hp_section = self._K * hp_cutoff
+        lp_section = self._K * lp_cutoff
+
+        self.hp_stage1.set_cutoff(hp_section)
+        self.hp_stage2.set_cutoff(hp_section)
+        self.lp_stage1.set_cutoff(lp_section)
+        self.lp_stage2.set_cutoff(lp_section)
+
     
     def process_sample(self, x: float) -> float:
         """Process a single audio sample through the second-order band-pass filter."""
