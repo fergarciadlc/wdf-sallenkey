@@ -1,11 +1,13 @@
 from typing import Iterable
 import numpy as np
 
+
 if __name__ == "__main__" and __package__ is None:
     import sys
     from pathlib import Path
 
     sys.path.append(str(Path(__file__).resolve().parents[1]))
+
 
 # Import the 1st‑order section we already created
 from prototypes.src.rc_highpass import RCHighPass
@@ -123,4 +125,5 @@ if __name__ == "__main__":
 
     g = measure_gain(hp2, hp2.cutoff)
     print(f"Gain @ {hp2.cutoff} Hz: {20*np.log10(g):.2f} dB")
+
 
