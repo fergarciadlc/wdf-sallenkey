@@ -4,6 +4,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pywdf.core.circuit import Circuit
 
+if __name__ == "__main__" and __package__ is None:
+    # When executed directly, add the parent folder so relative imports work
+    import sys
+    from pathlib import Path
+
+    sys.path.append(str(Path(__file__).resolve().parents[1]))
+
 # Import the low-pass and high-pass filters already created
 from .rc_lowpass import RCLowPass
 from .rc_highpass import RCHighPass
@@ -129,7 +136,6 @@ class RCBandPass2nd(Circuit):
     apply_auto_gain : bool, optional
         Whether to apply automatic gain compensation. Default: True
     """
-
     _K = 1.553  # section-frequency multiplier for Butterworth alignment
 
     def __init__(self, sample_rate: int, center_freq: float,
@@ -207,7 +213,6 @@ class RCBandPass2nd(Circuit):
         self.hp_stage2.set_cutoff(hp_section)
         self.lp_stage1.set_cutoff(lp_section)
         self.lp_stage2.set_cutoff(lp_section)
-
     
     def process_sample(self, x: float) -> float:
         """Process a single audio sample through the second-order band-pass filter."""
