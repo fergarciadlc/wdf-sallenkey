@@ -7,6 +7,7 @@ if __name__ == "__main__" and __package__ is None:
 
     sys.path.append(str(Path(__file__).resolve().parents[1]))
 
+
 from .rc_lowpass import RCLowPass
 
 __all__ = ["RC2ndOrderLowPass"]

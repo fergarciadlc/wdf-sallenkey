@@ -1,11 +1,13 @@
 from typing import Iterable
 import numpy as np
 
+
 if __name__ == "__main__" and __package__ is None:
     import sys
     from pathlib import Path
 
     sys.path.append(str(Path(__file__).resolve().parents[1]))
+
 
 # Import the 1st‑order section we already created
 from prototypes.src.rc_highpass import RCHighPass
