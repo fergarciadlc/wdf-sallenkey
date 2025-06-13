@@ -12,10 +12,10 @@ class WDFRCHighPass : public WDFilter
 {
 public:
     WDFRCHighPass()
-        : c1(1.0e-6)
-        , // 1 uF (fixed)
-        r1(1.0e3)
-        , // tuned by setCutoff()
+        : c1(1.0e-7)
+        , // 100 nF capacitor
+        r1(1.5e3)
+        , // 1.5 kOhms resistor, tuned by setCutoff()
         s1(c1, r1)
         , // series C -> R
         inverter(s1)
@@ -55,7 +55,7 @@ public:
 private:
     void updateComponentValues()
     {
-        constexpr double C = 1.0e-6;                                                     // farads
+        constexpr double C = 1.0e-7;                                                     // farads
         const double     R = 1.0 / (2.0 * juce::MathConstants<double>::pi * cutoff * C); // from fc formula
         r1.setResistanceValue(R);
     }
@@ -93,8 +93,8 @@ public:
     void setCutoff(double fc) override
     {
         cutoff = juce::jlimit(20.0, fs * 0.45, fc);
-        stage1.setCutoff(cutoff);
-        stage2.setCutoff(cutoff);
+        stage1.setCutoff(cutoff / _k);
+        stage2.setCutoff(cutoff / _k);
     }
 
     double getCutoff() const override { return cutoff; }
@@ -105,5 +105,5 @@ public:
 
 private:
     WDFRCHighPass stage1, stage2;
-    double        fs{44100.0}, cutoff{1000.0};
+    double        fs{44100.0}, cutoff{1000.0}, _k{1.553};
 };
