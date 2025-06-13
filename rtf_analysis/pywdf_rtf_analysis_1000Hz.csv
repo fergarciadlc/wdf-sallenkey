@@ -1,0 +1,7 @@
+filter_type,rtf
+LowPass (order 1),0.068051
+LowPass (order 2),0.066794
+HighPass (order 1),0.106086
+HighPass (order 2),0.107062
+BandPass (order 1),0.174579
+BandPass (order 2),0.339147
