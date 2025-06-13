@@ -102,7 +102,7 @@ public:
     double processSample(double x) override
     {
         if (applyAutoGain)
-            x *= 2.23; // Apply auto gain to maintain consistent output level
+            x *= 1.45; // Apply auto gain to maintain consistent output level
         return stage2.processSample(stage1.processSample(x));
     }
 
