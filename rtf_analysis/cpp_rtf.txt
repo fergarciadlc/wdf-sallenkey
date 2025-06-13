@@ -1,0 +1,18 @@
+> ./build_Debug/analysis_cli/RealTimeFactorAnalyzer
+JUCE v8.0.6
+Analyzing real-time factors for all filter types...
+Output directory: /Users/fernando/dev/upf/wdf-sallenkey/rtf_analysis
+Test duration: 30 seconds
+Sample rate: 48000 Hz
+Cutoff frequency: 1000 Hz
+
+Results:
+
+LowPass (1st order): RTF = 0.00169304
+LowPass (2nd order): RTF = 0.00281582
+HighPass (1st order): RTF = 0.00161018
+HighPass (2nd order): RTF = 0.00276999
+BandPass (1st order): RTF = 0.00286202
+BandPass (2nd order): RTF = 0.00563571
+
+Real-time factor analysis complete
