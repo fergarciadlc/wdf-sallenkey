@@ -75,6 +75,9 @@ class RCLowPass(Circuit):
         if cutoff_hz <= 0:
             raise ValueError("Cut‑off frequency must be positive")
 
+        # Clamp cutoff to a sensible range
+        cutoff_hz = max(20.0, min(self.fs * 0.45, cutoff_hz))
+
         if self._cutoff != cutoff_hz:
             self._cutoff = cutoff_hz
             self.R_val = 1.0 / (2.0 * np.pi * self.C_val * cutoff_hz)
@@ -109,6 +112,3 @@ if __name__ == "__main__":  # Quick sanity‑check when run as script
 
     lpf = RCLowPass(sample_rate=48_000, cutoff_hz=1000)
     lpf.plot_freqz()
-
-    # Uncomment to see parameter sweep
-    # lpf.plot_freqz_list(range(500, 5000, 500), lpf.set_cutoff, "fc")

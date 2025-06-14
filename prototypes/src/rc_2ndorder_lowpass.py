@@ -83,4 +83,3 @@ if __name__ == "__main__":
 
     g = measure_gain(lp2, lp2.cutoff)
     print(f"Gain @ {lp2.cutoff} Hz: {20*np.log10(g):.2f} dB")
-

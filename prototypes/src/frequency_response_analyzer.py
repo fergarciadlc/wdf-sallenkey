@@ -6,13 +6,28 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal
 
+if __name__ == "__main__" and __package__ is None:
+    import sys
+    from pathlib import Path
+
+    sys.path.append(str(Path(__file__).resolve().parents[1]))
+
 from .rc_1st2ndorder_bandpass import RCBandPass1st, RCBandPass2nd
 from .rc_highpass import RCHighPass
 from .rc_lowpass import RCLowPass
+from .rc_2ndorder_highpass import RC2ndOrderHighPass
+from .rc_2ndorder_lowpass import RC2ndOrderLowPass
 
 
 def calculate_frequency_response(
-    filter_instance: Union[RCLowPass, RCHighPass, RCBandPass1st, RCBandPass2nd],
+    filter_instance: Union[
+        RCLowPass,
+        RC2ndOrderLowPass,
+        RCHighPass,
+        RC2ndOrderHighPass,
+        RCBandPass1st,
+        RCBandPass2nd,
+    ],
     sample_rate: float,
     fft_order: int = 14,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -21,7 +36,14 @@ def calculate_frequency_response(
 
     Parameters
     ----------
-    filter_instance : Union[RCLowPass, RCHighPass, RCBandPass1st, RCBandPass2nd]
+    filter_instance : Union[
+        RCLowPass,
+        RC2ndOrderLowPass,
+        RCHighPass,
+        RC2ndOrderHighPass,
+        RCBandPass1st,
+        RCBandPass2nd,
+    ]
         The filter instance to analyze
     sample_rate : float
         Sample rate in Hz
@@ -118,7 +140,10 @@ def main():
 
     # Generate responses for low pass filters
     for order in [1, 2]:
-        filter_instance = RCLowPass(SAMPLE_RATE, CUTOFF_FREQ)
+        if order == 1:
+            filter_instance = RCLowPass(SAMPLE_RATE, CUTOFF_FREQ)
+        else:
+            filter_instance = RC2ndOrderLowPass(SAMPLE_RATE, CUTOFF_FREQ)
         frequencies, magnitudes, phases = calculate_frequency_response(
             filter_instance, SAMPLE_RATE, FFT_ORDER
         )
@@ -128,7 +153,10 @@ def main():
 
     # Generate responses for high pass filters
     for order in [1, 2]:
-        filter_instance = RCHighPass(SAMPLE_RATE, CUTOFF_FREQ)
+        if order == 1:
+            filter_instance = RCHighPass(SAMPLE_RATE, CUTOFF_FREQ)
+        else:
+            filter_instance = RC2ndOrderHighPass(SAMPLE_RATE, CUTOFF_FREQ)
         frequencies, magnitudes, phases = calculate_frequency_response(
             filter_instance, SAMPLE_RATE, FFT_ORDER
         )

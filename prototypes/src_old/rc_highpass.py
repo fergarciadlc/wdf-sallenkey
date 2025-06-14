@@ -101,9 +101,6 @@ class RCHighPass(Circuit):
         if getattr(self, "cutoff", None) == fc:
             return
 
-        # Clamp cutoff to a sensible range
-        fc = max(20.0, min(self.fs * 0.45, fc))
-
         self.cutoff = fc
         # High‑pass RC: C = 1/(2π R_load fc)
         c_val = 1.0 / (2.0 * np.pi * self.r_load * fc)

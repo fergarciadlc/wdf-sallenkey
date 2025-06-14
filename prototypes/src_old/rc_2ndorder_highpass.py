@@ -1,12 +1,6 @@
 from typing import Iterable
 import numpy as np
 
-if __name__ == "__main__" and __package__ is None:
-    import sys
-    from pathlib import Path
-
-    sys.path.append(str(Path(__file__).resolve().parents[1]))
-
 # Import the 1st‑order section we already created
 from prototypes.src.rc_highpass import RCHighPass
 
@@ -70,8 +64,6 @@ class RC2ndOrderHighPass:
         *new_cutoff*.
         """
         if new_cutoff != self.cutoff:
-            # Clamp cutoff and translate for the cascaded sections
-            new_cutoff = max(20.0, min(self.fs * 0.45, new_cutoff))
             self.cutoff = new_cutoff
             fc_section = self._K * new_cutoff
             self._stage1.set_cutoff(fc_section)
@@ -102,25 +94,3 @@ class RC2ndOrderHighPass:
 
     def AC_transient_analysis(self, *args, **kwargs):
         self._stage2.AC_transient_analysis(*args, **kwargs)
-
-
-if __name__ == "__main__":
-    import numpy as np
-
-    def measure_gain(filt: "RC2ndOrderHighPass", freq: float, n: int = 8192) -> float:
-        t = np.arange(n) / filt.fs
-        x = np.sin(2 * np.pi * freq * t)
-        y = filt.process_block(x)
-
-        freqs = np.fft.rfftfreq(n, 1 / filt.fs)
-        X = np.fft.rfft(x)
-        Y = np.fft.rfft(y)
-        idx = np.argmin(np.abs(freqs - freq))
-        return np.abs(Y[idx]) / np.abs(X[idx])
-
-    hp2 = RC2ndOrderHighPass(sample_rate=48_000, cutoff=1_000)
-    hp2.plot_freqz()
-
-    g = measure_gain(hp2, hp2.cutoff)
-    print(f"Gain @ {hp2.cutoff} Hz: {20*np.log10(g):.2f} dB")
-
